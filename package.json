@@ -1,0 +1,33 @@
+{
+  "name": "ideas",
+  "version": "1.0.0",
+  "description": "Ideas de deasrrollo web, recopiladas de diferentes lugares",
+  "main": "app.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/GuillermoCochrane/Ideas.git"
+  },
+  "author": "Guillermo Cochrane",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/GuillermoCochrane/Ideas/issues"
+  },
+  "homepage": "https://github.com/GuillermoCochrane/Ideas#readme",
+  "scripts": {
+    "start": "node ./src/bin/www",
+    "dev": "nodemon ./src/bin/www"
+  },
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "debug": "~2.6.9",
+    "cookie-parser": "^1.4.6",
+    "ejs": "^3.1.9",
+    "express": "^4.18.2",
+    "express-session": "^1.17.3",
+    "express-validator": "^7.0.1",
+    "method-override": "^3.0.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
+  }
+}
