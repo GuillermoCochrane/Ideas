@@ -7,8 +7,8 @@ router.get('/', function(req, res, next) {
 });
 
 
-router.get('/1', function(req, res, next) {
-  res.render(url);
+router.get('/:id', function(req, res, next) {
+  res.render(req.params.id);
 });
 
 router.get('/sliders/:id', function(req, res, next) {
