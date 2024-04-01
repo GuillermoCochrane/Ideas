@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    *{
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    #slider-container-outer {
+      overflow: hidden;
+      padding: 10px;
+      display: flex;
+    }
+    #slider-container {
+      padding: 10px;
+      display: flex;
+      flex-wrap: nowrap;
+      flex-direction: row;
+      /* Transición aplicada cuando se desplazan los elementos */
+      transition: transform 0.7s ease-in-out;
+      position: relative;
+      gap: 10px;
+      width: 80%;
+      overflow: hidden;
+      margin:auto;
+    }
+    .slider-item {
+      position: relative;
+      width: 200px;
+      flex-shrink: 0;
+      padding: 20px;
+      background-color: #f0f0f0;
+      border: 1px solid #ccc;
+      /* right: 130px; */
+      transition: all .7s ease-in-out; /* Transición suave */
+    }
+
+    nav{
+      margin: auto;
+      display: flex;
+      gap: 20px;
+      justify-content: space-around;
+    }
+
+
+  </style>
+</head>
+<body>
+  <div id="slider-container-outer">
+    <div id="slider-container" class="slider-container-transition">
+      <div class="slider-item" style="order: 1;background: blue;">Item 1</div>
+      <div class="slider-item" style="order: 2;background: red;">Item 2</div>
+      <div class="slider-item" style="order: 3;background: yellow;">Item 3</div>
+      <div class="slider-item" style="order: 4;background: lime;">Item 4</div>
+      <div class="slider-item" style="order: 5;background: orange;">Item 5</div>
+      <div class="slider-item" style="order: 6;background: purple;">Item 6</div>
+      <div class="slider-item" style="order: 7;background: brown;">Item 7</div>
+      <div class="slider-item" style="order: 8;background: grey;">Item 8</div>
+    </div>
+  </div>
+  <nav>
+    <button id="move-left-button">Mover a la Izquierda</button>
+    <button id="move-right-button">Mover a la Derecha</button>
+  </nav>
+  
+
+  <script>
+    const cards = document.querySelectorAll(".slider-item");
+    const lbtn = document.querySelector("#move-left-button");
+    const rbtn = document.querySelector("#move-right-button");
+    const cardsNumber = cards.length;
+    console.log(cardsNumber);
+    lbtn.addEventListener("click",()=>{
+        for (let card of cards) {
+            let cardOrder = card.style.order; 
+            if(cardOrder == 1){
+                card.style.order = cardsNumber
+            } else {
+                card.style.order = cardOrder - 1
+            }
+        }
+    })
+    rbtn.addEventListener("click",()=>{
+        for (let card of cards) { 
+          let cardOrder = card.style.order; 
+            if(cardOrder == cardsNumber){
+                card.style.order = 1
+            } 
+            else {
+                card.style.order = parseInt(cardOrder) + 1
+            }
+        }
+        /* card.classList.toggle("slide-right"); */
+    })
+  </script>
+</body>
+</html>
