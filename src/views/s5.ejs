@@ -3,62 +3,43 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <style>
-    *{
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
-    #slider-container-outer {
-      overflow: hidden;
-      padding: 10px;
-      display: flex;
-    }
-    #slider-container {
-      padding: 10px;
-      display: flex;
-      flex-wrap: nowrap;
-      flex-direction: row;
-      /* Transición aplicada cuando se desplazan los elementos */
-      transition: transform 0.7s ease-in-out;
-      position: relative;
-      gap: 10px;
-      width: 80%;
-      overflow: hidden;
-      margin:auto;
-    }
-    .slider-item {
-      position: relative;
-      width: 200px;
-      flex-shrink: 0;
-      padding: 20px;
-      background-color: #f0f0f0;
-      border: 1px solid #ccc;
-      /* right: 130px; */
-      transition: all .7s ease-in-out; /* Transición suave */
-    }
-
-    nav{
-      margin: auto;
-      display: flex;
-      gap: 20px;
-      justify-content: space-around;
-    }
-
-
-  </style>
+  <link rel="stylesheet" href="/css/s5.css">
 </head>
 <body>
   <div id="slider-container-outer">
     <div id="slider-container" class="slider-container-transition">
-      <div class="slider-item" style="order: 1;background: blue;">Item 1</div>
-      <div class="slider-item" style="order: 2;background: red;">Item 2</div>
-      <div class="slider-item" style="order: 3;background: yellow;">Item 3</div>
-      <div class="slider-item" style="order: 4;background: lime;">Item 4</div>
-      <div class="slider-item" style="order: 5;background: orange;">Item 5</div>
-      <div class="slider-item" style="order: 6;background: purple;">Item 6</div>
-      <div class="slider-item" style="order: 7;background: brown;">Item 7</div>
-      <div class="slider-item" style="order: 8;background: grey;">Item 8</div>
+      <div class="slider-item" style="order: 1;background: blue;">
+        <img src="/images/slider5/image1.jpg" alt="Imagen 1">
+        <figcaption>Gus Fring</figcaption>
+      </div>
+      <div class="slider-item" style="order: 2;background: red;">
+        <img src="/images/slider5/image2.jpg" alt="Imagen 1">
+        <figcaption>Robb Stark</figcaption>
+      </div>
+      <div class="slider-item" style="order: 3;background: yellow;">
+        <img src="/images/slider5/image3.jpg" alt="Imagen 1">
+        <figcaption>Lagherta Lothbrok</figcaption>
+      </div>
+      <div class="slider-item" style="order: 4;background: lime;">
+        <img src="/images/slider5/image4.jpg" alt="Imagen 1">
+        <figcaption>Annie January</figcaption>
+      </div>
+      <div class="slider-item" style="order: 5;background: orange;">
+        <img src="/images/slider5/image5.jpg" alt="Imagen 1">
+        <figcaption>Jon Snow</figcaption>
+      </div>
+      <div class="slider-item" style="order: 6;background: purple;">
+        <img src="/images/slider5/image6.jpg" alt="Imagen 1">
+        <figcaption>Octavia Blake</figcaption>
+      </div>
+      <div class="slider-item" style="order: 7;background: brown;">
+        <img src="/images/slider5/image7.jpg" alt="Imagen 1">
+        <figcaption>Tony Stark</figcaption>
+      </div>
+      <div class="slider-item" style="order: 8;background: grey;">
+        <img src="/images/slider5/image8.jpg" alt="Imagen 1">
+        <figcaption>Lucifer Morningstar</figcaption>
+      </div>
     </div>
   </div>
   <nav>
