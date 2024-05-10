@@ -4,7 +4,7 @@
 
 body {
   padding: 50px;
-  font-family: "Lucida Grande", Helvetica, Arial, sans-serif;
+  font-family: Arial, sans-serif;
   font-size: 20px;
   background-color: #444;
 }
@@ -21,41 +21,6 @@ h2{
   text-align: center;
 }
 
-summary {
-  list-style: none;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 10px 10px;
-  font-weight: bold;
-  background-color: #666;
-  margin: 0 5px;
-  cursor: pointer;
-  font-size: 40px;
-}
-
-summary::after {
-  content: '';
-  width: 0;
-  height: 0;
-  border-top: 10px solid #15171b;
-  border-inline: 7px solid transparent;
-  transition: 0.2s;
-}
-
-details[open] > summary::after {
-  transform: rotate(-180deg);
-}
-
-summary::-webkit-details-marker {
-  display: none;
-}
-
-summary {
-  color: #ee8002;
-  border-radius: 5px;
-}
-
 details {
   background: #333;
   border-radius: 5px;
@@ -63,6 +28,22 @@ details {
   margin-block: 15px;
   padding-block: 5px;
 }
+
+summary {
+  padding: 5px 10px;
+  font-weight: bold;
+  background-color: #666;
+  margin: 0 5px;
+  cursor: pointer;
+  color: #ee8002;
+  border-radius: 5px;
+  list-style: none;
+}
+
+summary::-webkit-details-marker {
+  display: none;
+}
+
 
 ul{
   list-style-type: none;
@@ -80,12 +61,24 @@ a {
   text-decoration: none;
 }
 
-@media screen and (min-width: 768px) {
-  summary {
-    font-size: 20px;
+/* @media screen and (min-width: 768px) {
+  h1{
+    color: blue;
   }
-
-  details {
-    width: 70%;
+  .details {
+      width: 50%;
+  }
+  summary {
+    font-size: 20px
   }
 }
+
+@media (min-width: 1200px) {
+  .details {
+    width: 50%;
+  }
+
+  summary {
+    font-size: 20px
+  }
+} */
