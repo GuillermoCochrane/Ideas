@@ -4,6 +4,7 @@ var createError = require('http-errors');
 const methodOverride =  require('method-override'); // Required for use methods PUT and DELETE
 var cookieParser = require('cookie-parser');
 const session = require('express-session');
+const EmblaCarousel = require('embla-carousel'); // Importa Embla Carousel
 
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
@@ -17,6 +18,7 @@ app.set('view engine', 'ejs');
 //Settings
 /* app.use(express.static(path.join(__dirname, 'public'))); */
 app.use(express.static( 'public'));
+app.use(express.static('../node_modules/embla-carousel/')); // Servir Embla Carousel desde node_modules
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
 app.use(methodOverride('_method'));
