@@ -19,6 +19,7 @@ window.addEventListener('load', () => {
   const geminiDateInput = document.getElementById('geminiDate');
   const claudeDateInput = document.getElementById('claudeDate');
   const btnAdd = document.getElementById('btnAdd');
+  const linkAdd = document.getElementById('linkAdd');
   const btnExport = document.getElementById('btnExport');
   const btnImport = document.getElementById('btnImport');
   const importFile = document.getElementById('importFile');
@@ -320,6 +321,7 @@ window.addEventListener('load', () => {
 
   // Event listeners
   btnAdd.addEventListener('click', openModalForAdd);
+  linkAdd.addEventListener('click', openModalForAdd);
   btnCancel.addEventListener('click', closeModal);
   modal.addEventListener('close', closeModal);
   entryForm.addEventListener('submit', handleFormSubmit);
