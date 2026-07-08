@@ -187,6 +187,18 @@
       border: 1px solid var(--border);
     }
 
+    .empty-state a {
+      color: var(--accent);
+      font-weight: 600;
+      text-decoration: underline;
+      text-underline-offset: 2px;
+      transition: color 0.2s;
+    }
+
+    .empty-state a:hover {
+      color: var(--accent-hover);
+    }
+
     /* Diálogo nativo centrado */
     dialog {
       border: none;
