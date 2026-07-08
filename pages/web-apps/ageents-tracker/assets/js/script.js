@@ -1,4 +1,4 @@
-window.addEventListener('load ', () => {
+window.addEventListener('load', () => {
   const STORAGE_KEY = 'antygravity_tracking';
   const THEME_KEY = 'theme_preference';
 
@@ -70,7 +70,7 @@ window.addEventListener('load ', () => {
     target.setHours(0,0,0,0);
     const diffDays = Math.ceil((target - today) / (1000 * 60 * 60 * 24));
 
-    if (diffDays < 0) return 'dot-green';        // Ya pasó → disponible
+    if (diffDays <= 0) return 'dot-green';        // Ya pasó → disponible
     if (diffDays >= 5 && diffDays <= 7) return 'dot-red'; // Próximo (5-7 días)
     return 'dot-yellow';                          // Resto
   }
