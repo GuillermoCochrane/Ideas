@@ -32,7 +32,7 @@
       --text: #f1f5f9;
       --text-secondary: #94a3b8;
       --border: #334155;
-      --shadow: rgba(0,0,0,0.25);
+      --shadow: rgba(255,255,255,0.25);
       --accent: #60a5fa;
       --accent-hover: #3b82f6;
       --danger-bg: #7f1d1d;
@@ -100,8 +100,7 @@
 
     button:hover {
       background: var(--border);
-      transform: translateY(-1px);
-      box-shadow: 0 4px 8px var(--shadow);
+      box-shadow: 0 0 2px 2px var(--shadow);
     }
 
     .btn-primary {
