@@ -154,6 +154,15 @@
       text-align: center;  /* Centrado */
     }
 
+    tbody tr:hover {
+      background: var(--border);
+      transition: background 0.4 ease-in-out;
+    }
+
+    tbody tr {
+      transition: background 0.4s ease-in-out;
+    }
+
     td {
       padding: 0.8rem 1rem;
       border-bottom: 1px solid var(--table-border);
