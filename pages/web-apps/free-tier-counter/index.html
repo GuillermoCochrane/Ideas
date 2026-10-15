@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Capa Gratuita — Registro</title>
+<title>Tracker de capa gratuita</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📆</text></svg>">
 <style>
   :root {
@@ -40,13 +40,25 @@
     line-height: 1.5;
   }
 
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+
   main {
     max-width: 720px;
     height: 100%;
     margin: 0 auto;
     display: grid;
     gap: 1.5rem;
-    grid-template-rows: auto auto auto auto 1fr;
+    grid-template-rows: auto auto auto 1fr;
   }
 
   /* ---------- Layout amplio: contador y form en la misma fila ---------- */
@@ -55,43 +67,15 @@
       max-width: 960px;
       grid-template-columns: 1fr 1fr;
       grid-template-areas:
-        "header   header"
         "contador form"
         "acciones acciones"
         "tabla    tabla";
-      grid-template-rows: auto auto auto 1fr;
+      grid-template-rows: auto auto 1fr;
     }
-    header            { grid-area: header; }
     #seccion-contador { grid-area: contador; }
     #seccion-form     { grid-area: form; }
     .acciones         { grid-area: acciones; }
     #seccion-tabla    { grid-area: tabla; }
-  }
-
-  header {
-    text-align: center;
-    border-bottom: 1px solid var(--border);
-    padding-bottom: 1rem;
-  }
-
-  h1 {
-    font-size: 1.8rem;
-    margin: 0 0 0.25rem;
-    letter-spacing: 0.15em;
-    text-transform: uppercase;
-    color: var(--cyan);
-    text-shadow:
-      0 0 10px var(--cyan),
-      2px 0 0 rgba(255, 184, 0, 0.5),
-      -2px 0 0 rgba(0, 240, 255, 0.3);
-  }
-
-  header p {
-    margin: 0;
-    color: var(--text-dim);
-    font-size: 0.85rem;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
   }
 
   section {
@@ -405,10 +389,7 @@
 </head>
 <body>
 <main>
-  <header>
-    <h1>Capa Gratuita</h1>
-    <p>Registro de mensajes enviados</p>
-  </header>
+  <h1 class="sr-only" id="titulo-app">Tracker de capa gratuita</h1>
 
   <section id="seccion-contador" aria-labelledby="contador-titulo">
     <h2 id="contador-titulo">Usos disponibles</h2>
@@ -444,8 +425,7 @@
     <input type="file" id="archivo" accept="application/json,.json" hidden>
   </section>
 
-  <section id="seccion-tabla" aria-labelledby="tabla-titulo">
-    <h2 id="tabla-titulo">Mensajes enviados</h2>
+  <section id="seccion-tabla" aria-labelledby="titulo-app">
     <table id="tabla">
       <thead>
         <tr>
