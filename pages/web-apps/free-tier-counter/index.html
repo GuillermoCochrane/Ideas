@@ -64,7 +64,7 @@
   /* ---------- Layout amplio: contador y form en la misma fila ---------- */
   @media (min-width: 700px) {
     main {
-      max-width: 960px;
+      max-width: 1080px;
       grid-template-columns: 1fr 1fr;
       grid-template-areas:
         "contador form"
@@ -283,6 +283,13 @@
   /* ---------- Tabla ---------- */
   #seccion-tabla {
     min-height: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  #tabla-scroll {
+    min-height: 0;
     overflow-y: auto;
   }
 
@@ -290,6 +297,7 @@
     width: 100%;
     border-collapse: collapse;
     font-size: 0.95rem;
+    table-layout: fixed;
   }
 
   th, td {
@@ -297,6 +305,9 @@
     text-align: left;
     border: 1px solid var(--border);
     transition: border-color 150ms ease, box-shadow 150ms ease, background-color 150ms ease;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
   th {
@@ -306,18 +317,30 @@
     color: var(--amber);
     text-shadow: 0 0 4px rgba(255, 184, 0, 0.3);
     background: rgba(255, 184, 0, 0.04);
+    position: sticky;
+    top: 0;
+    z-index: 1;
   }
 
-  th:first-child, td:first-child {
+  /* Grupo 1: columnas 1-3. Grupo 2: columnas 4-6 */
+  th:nth-child(1), td:nth-child(1),
+  th:nth-child(4), td:nth-child(4) {
     width: 3rem;
     text-align: center;
     color: var(--text-dim);
   }
 
-  td:last-child {
+  th:nth-child(3), td:nth-child(3),
+  th:nth-child(6), td:nth-child(6) {
     width: 7rem;
     text-align: right;
-    white-space: nowrap;
+  }
+
+  /* Separador visual entre grupos (solo desktop) */
+  @media (min-width: 700px) {
+    th:nth-child(4), td:nth-child(4) {
+      border-left: 2px solid var(--border-strong);
+    }
   }
 
   tbody tr:hover { background: rgba(0, 240, 255, 0.06); }
@@ -325,10 +348,6 @@
   tbody tr:hover td {
     border-color: var(--border-strong);
     box-shadow: inset 0 0 8px rgba(0, 240, 255, 0.12);
-  }
-
-  tbody tr:hover td:first-child {
-    box-shadow: inset 3px 0 0 var(--cyan), inset 0 0 8px rgba(0, 240, 255, 0.12);
   }
 
   tbody tr.nueva { animation: fadeIn 150ms ease; }
@@ -366,6 +385,27 @@
     padding: 1rem;
   }
 
+  /* ---------- Paginación ---------- */
+  #paginacion {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+  }
+
+  #paginacion button {
+    padding: 0.35rem 0.85rem;
+  }
+
+  #pag-info {
+    color: var(--cyan);
+    font-size: 0.9rem;
+    letter-spacing: 0.15em;
+    min-width: 4rem;
+    text-align: center;
+    text-shadow: 0 0 6px rgba(0, 240, 255, 0.5);
+  }
+
   /* ---------- Responsive ---------- */
   @media (max-width: 480px) {
     body { padding: 1rem 0.5rem; }
@@ -373,10 +413,9 @@
     #contador { font-size: 2.5rem; }
     form p { flex-direction: column; align-items: stretch; }
     label { text-align: left; }
-    td:last-child { width: 5.5rem; }
-    td button { padding: 0.25rem 0.45rem; }
     .acciones { justify-content: center; }
     .acciones #btn-reiniciar { margin-left: 0; }
+    td button { padding: 0.25rem 0.45rem; }
   }
 
   @media (prefers-reduced-motion: reduce) {
@@ -426,17 +465,18 @@
   </section>
 
   <section id="seccion-tabla" aria-labelledby="titulo-app">
-    <table id="tabla">
-      <thead>
-        <tr>
-          <th scope="col">#</th>
-          <th scope="col">Hora</th>
-          <th scope="col">Acciones</th>
-        </tr>
-      </thead>
-      <tbody id="tbody"></tbody>
-    </table>
+    <div id="tabla-scroll">
+      <table id="tabla">
+        <thead id="tabla-thead"></thead>
+        <tbody id="tbody"></tbody>
+      </table>
+    </div>
     <p id="tabla-vacia">Sin registros todavía.</p>
+    <nav id="paginacion" aria-label="Paginación" hidden>
+      <button type="button" id="btn-pag-prev" aria-label="Página anterior">◀</button>
+      <output id="pag-info" aria-live="polite">1 / 1</output>
+      <button type="button" id="btn-pag-next" aria-label="Página siguiente">▶</button>
+    </nav>
   </section>
 </main>
 
@@ -445,8 +485,11 @@
   'use strict';
 
   const MAX = 56;
+  const TAM_PAGINA = 8;
   const STORAGE_KEY = 'capaGratis.v1';
   const HORA_RE = /^([01]\d|2[0-3]):[0-5]\d$/;
+
+  const mqDesktop = window.matchMedia('(min-width: 700px)');
 
   const $ = (id) => document.getElementById(id);
   const contadorEl     = $('contador');
@@ -458,8 +501,13 @@
   const formError      = $('form-error');
   const formFinalizada = $('form-finalizada');
   const editandoInfo   = $('editando-info');
+  const tablaThead     = $('tabla-thead');
   const tbody          = $('tbody');
   const tablaVacia     = $('tabla-vacia');
+  const paginacion     = $('paginacion');
+  const btnPagPrev     = $('btn-pag-prev');
+  const btnPagNext     = $('btn-pag-next');
+  const pagInfo        = $('pag-info');
   const btnExportar    = $('btn-exportar');
   const btnImportar    = $('btn-importar');
   const btnReiniciar   = $('btn-reiniciar');
@@ -468,6 +516,7 @@
   // Única fuente de verdad. El contador se DERIVA: MAX - filas.length
   let filas = [];
   let editando = null;
+  let paginaActual = 0; // 0-indexed internamente
 
   // ---------- Persistencia ----------
   function cargar() {
@@ -496,6 +545,17 @@
     return out;
   }
 
+  // ---------- Paginación helpers ----------
+  function totalPaginas() {
+    return Math.max(1, Math.ceil(filas.length / TAM_PAGINA));
+  }
+
+  function clampPagina() {
+    const t = totalPaginas();
+    if (paginaActual >= t) paginaActual = t - 1;
+    if (paginaActual < 0) paginaActual = 0;
+  }
+
   // ---------- Mensajes ----------
   function mostrarError(msg) {
     formError.hidden = false;
@@ -506,14 +566,79 @@
     formError.textContent = '';
   }
 
+  // ---------- Construcción de la tabla ----------
+  function construirThead() {
+    tablaThead.textContent = '';
+    const tr = document.createElement('tr');
+    const grupos = mqDesktop.matches ? 2 : 1;
+    for (let g = 0; g < grupos; g++) {
+      for (const txt of ['#', 'Hora', 'Acciones']) {
+        const th = document.createElement('th');
+        th.scope = 'col';
+        th.textContent = txt;
+        tr.appendChild(th);
+      }
+    }
+    tablaThead.appendChild(tr);
+  }
+
+  function crearCeldaIdx(n) {
+    const td = document.createElement('td');
+    td.textContent = String(n);
+    return td;
+  }
+
+  function crearCeldaHora(txt) {
+    const td = document.createElement('td');
+    td.textContent = txt;
+    return td;
+  }
+
+  function crearCeldaAcciones(idxGlobal) {
+    const td = document.createElement('td');
+
+    const btnEditar = document.createElement('button');
+    btnEditar.type = 'button';
+    btnEditar.textContent = '✎';
+    btnEditar.setAttribute('aria-label', `Editar fila ${idxGlobal + 1}`);
+    btnEditar.addEventListener('click', () => iniciarEdicion(idxGlobal));
+
+    const btnEliminar = document.createElement('button');
+    btnEliminar.type = 'button';
+    btnEliminar.className = 'peligro';
+    btnEliminar.textContent = '×';
+    btnEliminar.setAttribute('aria-label', `Eliminar fila ${idxGlobal + 1}`);
+    btnEliminar.addEventListener('click', () => eliminarFila(idxGlobal));
+
+    td.append(btnEditar, btnEliminar);
+    return td;
+  }
+
+  function crearCeldasGrupo(idxGlobal) {
+    if (idxGlobal >= filas.length) {
+      return [
+        document.createElement('td'),
+        document.createElement('td'),
+        document.createElement('td'),
+      ];
+    }
+    return [
+      crearCeldaIdx(idxGlobal + 1),
+      crearCeldaHora(filas[idxGlobal].hora),
+      crearCeldaAcciones(idxGlobal),
+    ];
+  }
+
   // ---------- Render ----------
   function render(nuevaIdx = null) {
     const disponibles = MAX - filas.length;
 
+    // Contador
     contadorEl.textContent = String(disponibles);
     meterEl.value = disponibles;
     meterEl.setAttribute('aria-valuetext', `${disponibles} de ${MAX} usos disponibles`);
 
+    // Estado del formulario
     const sinCupo = disponibles <= 0;
     const bloqueado = sinCupo && editando === null;
     inputHora.disabled    = bloqueado;
@@ -521,39 +646,53 @@
     btnCancelar.disabled  = bloqueado;
     formFinalizada.hidden = !bloqueado;
 
+    // Paginación: clamps
+    clampPagina();
+    const total = totalPaginas();
+
+    // Thead
+    construirThead();
+
+    // Tbody
     tbody.textContent = '';
-    filas.forEach((fila, i) => {
-      const tr = document.createElement('tr');
-      if (i === nuevaIdx) tr.classList.add('nueva');
+    const esDesktop = mqDesktop.matches;
+    const inicio = paginaActual * TAM_PAGINA;
 
-      const tdIdx = document.createElement('td');
-      tdIdx.textContent = String(i + 1);
+    if (esDesktop) {
+      // 4 filas × 6 celdas (grupo 1: inicio+i, grupo 2: inicio+4+i)
+      for (let i = 0; i < 4; i++) {
+        const tr = document.createElement('tr');
+        const idx1 = inicio + i;
+        const idx2 = inicio + 4 + i;
+        if (idx1 === nuevaIdx || idx2 === nuevaIdx) tr.classList.add('nueva');
+        tr.append(...crearCeldasGrupo(idx1));
+        tr.append(...crearCeldasGrupo(idx2));
+        tbody.appendChild(tr);
+      }
+    } else {
+      // 8 filas × 3 celdas
+      for (let i = 0; i < TAM_PAGINA; i++) {
+        const idx = inicio + i;
+        const tr = document.createElement('tr');
+        if (idx === nuevaIdx) tr.classList.add('nueva');
+        tr.append(...crearCeldasGrupo(idx));
+        tbody.appendChild(tr);
+      }
+    }
 
-      const tdHora = document.createElement('td');
-      tdHora.textContent = fila.hora;
-
-      const tdAcc = document.createElement('td');
-
-      const btnEditar = document.createElement('button');
-      btnEditar.type = 'button';
-      btnEditar.textContent = '✎';
-      btnEditar.setAttribute('aria-label', `Editar fila ${i + 1}`);
-      btnEditar.addEventListener('click', () => iniciarEdicion(i));
-
-      const btnEliminar = document.createElement('button');
-      btnEliminar.type = 'button';
-      btnEliminar.className = 'peligro';
-      btnEliminar.textContent = '×';
-      btnEliminar.setAttribute('aria-label', `Eliminar fila ${i + 1}`);
-      btnEliminar.addEventListener('click', () => eliminarFila(i));
-
-      tdAcc.append(btnEditar, btnEliminar);
-      tr.append(tdIdx, tdHora, tdAcc);
-      tbody.appendChild(tr);
-    });
-
+    // Empty state
     tablaVacia.hidden = filas.length > 0;
 
+    // Paginador
+    const mostrarPag = total > 1;
+    paginacion.hidden = !mostrarPag;
+    if (mostrarPag) {
+      pagInfo.textContent = `${paginaActual + 1} / ${total}`;
+      btnPagPrev.disabled = editando !== null || paginaActual === 0;
+      btnPagNext.disabled = editando !== null || paginaActual >= total - 1;
+    }
+
+    // Indicador de edición
     if (editando !== null) {
       editandoInfo.hidden = false;
       editandoInfo.textContent = `Editando fila #${editando + 1}`;
@@ -563,9 +702,19 @@
     }
   }
 
+  // ---------- Navegación ----------
+  function irAPagina(n) {
+    if (editando !== null) return;
+    const total = totalPaginas();
+    if (n < 0 || n >= total) return;
+    paginaActual = n;
+    render();
+  }
+
   // ---------- Edición ----------
   function iniciarEdicion(idx) {
     editando = idx;
+    paginaActual = Math.floor(idx / TAM_PAGINA);
     inputHora.value = filas[idx].hora;
     btnSubmit.textContent = 'Guardar cambios';
     btnCancelar.hidden = false;
@@ -613,12 +762,13 @@
 
     if (editando !== null) {
       filas[editando].hora = valor;
+      const idxEditado = editando;
       editando = null;
       inputHora.value = '';
       btnSubmit.textContent = 'Agregar';
       btnCancelar.hidden = true;
       guardar();
-      render();
+      render(idxEditado);
       inputHora.focus();
       return;
     }
@@ -628,10 +778,11 @@
       return;
     }
     filas.push({ hora: valor });
+    const idxNuevo = filas.length - 1;
+    paginaActual = Math.floor(idxNuevo / TAM_PAGINA);
     guardar();
-    const nuevaIdx = filas.length - 1;
     inputHora.value = '';
-    render(nuevaIdx);
+    render(idxNuevo);
     inputHora.focus();
   }
 
@@ -670,6 +821,7 @@
         if (!ok) return;
         filas = candidatas;
         editando = null;
+        paginaActual = 0;
         inputHora.value = '';
         btnSubmit.textContent = 'Agregar';
         btnCancelar.hidden = true;
@@ -690,6 +842,7 @@
     if (!ok) return;
     filas = [];
     editando = null;
+    paginaActual = 0;
     inputHora.value = '';
     btnSubmit.textContent = 'Agregar';
     btnCancelar.hidden = true;
@@ -715,6 +868,11 @@
     archivoInput.value = '';
   });
   btnReiniciar.addEventListener('click', reiniciar);
+
+  btnPagPrev.addEventListener('click', () => irAPagina(paginaActual - 1));
+  btnPagNext.addEventListener('click', () => irAPagina(paginaActual + 1));
+
+  mqDesktop.addEventListener('change', () => render());
 
   // ---------- Inicio ----------
   cargar();
