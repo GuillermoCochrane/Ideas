@@ -58,7 +58,7 @@
     margin: 0 auto;
     display: grid;
     gap: 1.5rem;
-    grid-template-rows: auto auto auto 1fr;
+    grid-template-rows: auto auto auto auto;
   }
 
   /* ---------- Layout amplio: contador y form en la misma fila ---------- */
@@ -70,7 +70,7 @@
         "contador form"
         "acciones acciones"
         "tabla    tabla";
-      grid-template-rows: auto auto 1fr;
+      grid-template-rows: auto auto auto;
     }
     #seccion-contador { grid-area: contador; }
     #seccion-form     { grid-area: form; }
@@ -283,6 +283,8 @@
   /* ---------- Tabla ---------- */
   #seccion-tabla {
     min-height: 0;
+    max-height: 325px;
+    overflow: hidden;
     display: flex;
     flex-direction: column;
     gap: 0.75rem;
@@ -343,6 +345,12 @@
     }
   }
 
+  td.placeholder {
+    color: var(--text-dim);
+    opacity: 0.35;
+    user-select: none;
+  }
+
   tbody tr:hover { background: rgba(0, 240, 255, 0.06); }
 
   tbody tr:hover td {
@@ -391,6 +399,7 @@
     align-items: center;
     justify-content: center;
     gap: 1rem;
+    flex-shrink: 0;
   }
 
   #paginacion button {
@@ -513,10 +522,9 @@
   const btnReiniciar   = $('btn-reiniciar');
   const archivoInput   = $('archivo');
 
-  // Única fuente de verdad. El contador se DERIVA: MAX - filas.length
   let filas = [];
   let editando = null;
-  let paginaActual = 0; // 0-indexed internamente
+  let paginaActual = 0;
 
   // ---------- Persistencia ----------
   function cargar() {
@@ -614,14 +622,23 @@
     return td;
   }
 
+  function crearCeldasPlaceholder() {
+    const tdIdx = document.createElement('td');
+    tdIdx.textContent = '#';
+    tdIdx.className = 'placeholder';
+
+    const tdHora = document.createElement('td');
+    tdHora.textContent = '--:--';
+    tdHora.className = 'placeholder';
+
+    const tdAcc = document.createElement('td');
+    tdAcc.className = 'placeholder';
+
+    return [tdIdx, tdHora, tdAcc];
+  }
+
   function crearCeldasGrupo(idxGlobal) {
-    if (idxGlobal >= filas.length) {
-      return [
-        document.createElement('td'),
-        document.createElement('td'),
-        document.createElement('td'),
-      ];
-    }
+    if (idxGlobal >= filas.length) return crearCeldasPlaceholder();
     return [
       crearCeldaIdx(idxGlobal + 1),
       crearCeldaHora(filas[idxGlobal].hora),
@@ -658,7 +675,9 @@
     const esDesktop = mqDesktop.matches;
     const inicio = paginaActual * TAM_PAGINA;
 
-    if (esDesktop) {
+    if (filas.length === 0) {
+      // Sin filas: solo thead + mensaje. Sin placeholders.
+    } else if (esDesktop) {
       // 4 filas × 6 celdas (grupo 1: inicio+i, grupo 2: inicio+4+i)
       for (let i = 0; i < 4; i++) {
         const tr = document.createElement('tr');
