@@ -54,14 +54,14 @@
       grid-template-areas:
         "header   header"
         "contador form"
-        "tabla    tabla"
-        "footer   footer";
+        "acciones acciones"
+        "tabla    tabla";
     }
-    header           { grid-area: header; }
-    #seccion-contador{ grid-area: contador; }
-    #seccion-form    { grid-area: form; }
-    #seccion-tabla   { grid-area: tabla; }
-    footer           { grid-area: footer; }
+    header            { grid-area: header; }
+    #seccion-contador { grid-area: contador; }
+    #seccion-form     { grid-area: form; }
+    .acciones         { grid-area: acciones; }
+    #seccion-tabla    { grid-area: tabla; }
   }
 
   header {
@@ -280,6 +280,18 @@
     text-align: center;
   }
 
+  /* ---------- Acciones (toolbar) ---------- */
+  .acciones {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+  }
+
+  .acciones #btn-reiniciar {
+    margin-left: auto;
+  }
+
   /* ---------- Tabla ---------- */
   table {
     width: 100%;
@@ -361,14 +373,6 @@
     padding: 1rem;
   }
 
-  /* ---------- Footer ---------- */
-  footer {
-    display: flex;
-    gap: 0.5rem;
-    flex-wrap: wrap;
-    justify-content: center;
-  }
-
   /* ---------- Responsive ---------- */
   @media (max-width: 480px) {
     body { padding: 1rem 0.5rem; }
@@ -378,6 +382,8 @@
     label { text-align: left; }
     td:last-child { width: 5.5rem; }
     td button { padding: 0.25rem 0.45rem; }
+    .acciones { justify-content: center; }
+    .acciones #btn-reiniciar { margin-left: 0; }
   }
 
   @media (prefers-reduced-motion: reduce) {
@@ -422,6 +428,13 @@
     <p id="form-finalizada" role="status" hidden>Capa gratis finalizada</p>
   </section>
 
+  <section class="acciones" role="toolbar" aria-label="Acciones de datos" aria-orientation="horizontal">
+    <button type="button" id="btn-exportar">Exportar</button>
+    <button type="button" id="btn-importar">Importar</button>
+    <button type="button" id="btn-reiniciar">Reiniciar</button>
+    <input type="file" id="archivo" accept="application/json,.json" hidden>
+  </section>
+
   <section id="seccion-tabla" aria-labelledby="tabla-titulo">
     <h2 id="tabla-titulo">Mensajes enviados</h2>
     <table id="tabla">
@@ -436,13 +449,6 @@
     </table>
     <p id="tabla-vacia">Sin registros todavía.</p>
   </section>
-
-  <footer>
-    <button type="button" id="btn-exportar">Exportar</button>
-    <button type="button" id="btn-importar">Importar</button>
-    <button type="button" id="btn-reiniciar">Reiniciar</button>
-    <input type="file" id="archivo" accept="application/json,.json" hidden>
-  </footer>
 </main>
 
 <script>
