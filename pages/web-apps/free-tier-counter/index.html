@@ -334,8 +334,14 @@
 
   th:nth-child(3), td:nth-child(3),
   th:nth-child(6), td:nth-child(6) {
-    width: 7rem;
-    text-align: right;
+    width: 9rem;
+    text-align: center;
+  }
+
+  td:nth-child(3), td:nth-child(6) {
+    display: flex;
+    align-items: center;
+    justify-content: space-evenly;
   }
 
   /* Separador visual entre grupos (solo desktop) */
@@ -349,6 +355,11 @@
     color: var(--text-dim);
     opacity: 0.35;
     user-select: none;
+  }
+
+  td.placeholder button {
+    visibility: hidden;
+    pointer-events: none;
   }
 
   tbody tr:hover { background: rgba(0, 240, 255, 0.06); }
@@ -366,9 +377,15 @@
   }
 
   td button {
-    padding: 0.25rem 0.6rem;
+    box-sizing: border-box;
+    padding: 0.3rem 0;
+    width: 2.3rem;
+    height: 1.8rem;
     font-size: 0.9rem;
-    margin-left: 0.25rem;
+  }
+
+  td button + button {
+    margin-left: 0.8rem;
   }
 
   td button.peligro {
@@ -424,7 +441,9 @@
     label { text-align: left; }
     .acciones { justify-content: center; }
     .acciones #btn-reiniciar { margin-left: 0; }
-    td button { padding: 0.25rem 0.45rem; }
+    td:nth-child(3), td:nth-child(6) { width: 6.5rem; }
+    td button { width: 2rem; padding: 0.25rem 0; }
+    td button + button { margin-left: 0.4rem; }
   }
 
   @media (prefers-reduced-motion: reduce) {
@@ -633,6 +652,23 @@
 
     const tdAcc = document.createElement('td');
     tdAcc.className = 'placeholder';
+
+    // Botones invisibles para preservar la altura de la fila
+    const b1 = document.createElement('button');
+    b1.type = 'button';
+    b1.textContent = '✎';
+    b1.tabIndex = -1;
+    b1.disabled = true;
+    b1.setAttribute('aria-hidden', 'true');
+
+    const b2 = document.createElement('button');
+    b2.type = 'button';
+    b2.textContent = '×';
+    b2.tabIndex = -1;
+    b2.disabled = true;
+    b2.setAttribute('aria-hidden', 'true');
+
+    tdAcc.append(b1, b2);
 
     return [tdIdx, tdHora, tdAcc];
   }
