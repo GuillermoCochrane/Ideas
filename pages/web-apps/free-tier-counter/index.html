@@ -165,19 +165,45 @@
   meter::-moz-meter-bar { background: var(--cyan); }
 
   /* ---------- Formulario ---------- */
-  form p {
-    margin: 0 0 0.75rem;
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    flex-wrap: wrap;
+  #seccion-form h2 {
+    font-size: 1.2rem;
+    margin: 0 0 0.5rem;
   }
 
-  label {
-    font-size: 0.8rem;
+  #campo-hora:not([hidden]) {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    border: 0;
+    padding: 0.75rem;
+    margin: 0;
+    min-width: 0;
+  }
+
+  #campo-hora > legend {
+    flex-basis: 100%;
+    width: 100%;
+    padding: 0;
+    margin: 0 0 0.5rem 0;
+    border: 0;
+    float: none;
+    font-size: 0.9rem;
     letter-spacing: 0.15em;
     text-transform: uppercase;
     color: var(--cyan);
+    font-weight: normal;
+    transition: color 150ms ease, text-shadow 150ms ease;
+  }
+
+  #campo-hora.editando > legend {
+    color: var(--amber);
+    text-shadow: 0 0 6px rgba(255, 184, 0, 0.5);
+  }
+
+  #campo-hora button {
+    min-width: 6.5rem;
   }
 
   input[type="time"] {
@@ -257,15 +283,6 @@
     border-color: var(--amber);
   }
 
-  #editando-info {
-    margin: 0 0 0.75rem;
-    color: var(--amber);
-    font-size: 0.85rem;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    text-shadow: 0 0 6px rgba(255, 184, 0, 0.5);
-  }
-
   #form-error {
     margin: 0.5rem 0 0;
     color: var(--red);
@@ -274,13 +291,14 @@
   }
 
   #form-finalizada {
-    margin: 0.5rem 0 0;
+    margin: 0;
     color: var(--amber);
-    font-size: 0.9rem;
+    font-size: 1rem;
     letter-spacing: 0.15em;
     text-transform: uppercase;
     text-shadow: 0 0 8px rgba(255, 184, 0, 0.5);
     text-align: center;
+    padding: 0.5rem 0;
   }
 
   /* ---------- Acciones (toolbar) ---------- */
@@ -492,16 +510,13 @@
 
   <section id="seccion-form" aria-labelledby="form-titulo">
     <h2 id="form-titulo">Registrar uso</h2>
-    <p id="editando-info" hidden></p>
     <form id="form" novalidate>
-      <p>
-        <label for="hora">Hora</label>
+      <fieldset id="campo-hora">
+        <legend id="legend-hora">Hora</legend>
         <input type="time" id="hora" name="hora" required autocomplete="off">
-      </p>
-      <p>
         <button type="submit" id="btn-submit">Agregar</button>
         <button type="button" id="btn-cancelar" hidden>Cancelar</button>
-      </p>
+      </fieldset>
       <p id="form-error" role="alert" hidden></p>
     </form>
     <p id="form-finalizada" role="status" hidden>Capa gratis finalizada</p>
@@ -550,7 +565,8 @@
   const btnCancelar    = $('btn-cancelar');
   const formError      = $('form-error');
   const formFinalizada = $('form-finalizada');
-  const editandoInfo   = $('editando-info');
+  const campoHora      = $('campo-hora');
+  const legendHora     = $('legend-hora');
   const tablaThead     = $('tabla-thead');
   const tbody          = $('tbody');
   const tablaVacia     = $('tabla-vacia');
@@ -716,9 +732,7 @@
     // Estado del formulario
     const sinCupo = disponibles <= 0;
     const bloqueado = sinCupo && editando === null;
-    inputHora.disabled    = bloqueado;
-    btnSubmit.disabled    = bloqueado;
-    btnCancelar.disabled  = bloqueado;
+    campoHora.hidden      = bloqueado;
     formFinalizada.hidden = !bloqueado;
 
     // Paginación: clamps
@@ -769,14 +783,6 @@
       btnPagNext.disabled = editando !== null || paginaActual >= total - 1;
     }
 
-    // Indicador de edición
-    if (editando !== null) {
-      editandoInfo.hidden = false;
-      editandoInfo.textContent = `Editando fila #${editando + 1}`;
-    } else {
-      editandoInfo.hidden = true;
-      editandoInfo.textContent = '';
-    }
   }
 
   // ---------- Navegación ----------
@@ -793,7 +799,9 @@
     editando = idx;
     paginaActual = Math.floor(idx / TAM_PAGINA);
     inputHora.value = filas[idx].hora;
-    btnSubmit.textContent = 'Guardar cambios';
+    legendHora.textContent = `Editando fila #${idx + 1}`;
+    campoHora.classList.add('editando');
+    btnSubmit.textContent = 'Guardar';
     btnCancelar.hidden = false;
     limpiarError();
     render();
@@ -803,6 +811,8 @@
   function cancelarEdicion() {
     editando = null;
     inputHora.value = '';
+    legendHora.textContent = 'Hora';
+    campoHora.classList.remove('editando');
     btnSubmit.textContent = 'Agregar';
     btnCancelar.hidden = true;
     limpiarError();
@@ -815,6 +825,8 @@
     if (editando === idx) {
       editando = null;
       inputHora.value = '';
+      legendHora.textContent = 'Hora';
+      campoHora.classList.remove('editando');
       btnSubmit.textContent = 'Agregar';
       btnCancelar.hidden = true;
     } else if (editando !== null && editando > idx) {
@@ -842,6 +854,8 @@
       const idxEditado = editando;
       editando = null;
       inputHora.value = '';
+      legendHora.textContent = 'Hora';
+      campoHora.classList.remove('editando');
       btnSubmit.textContent = 'Agregar';
       btnCancelar.hidden = true;
       guardar();
@@ -900,6 +914,8 @@
         editando = null;
         paginaActual = 0;
         inputHora.value = '';
+        legendHora.textContent = 'Hora';
+        campoHora.classList.remove('editando');
         btnSubmit.textContent = 'Agregar';
         btnCancelar.hidden = true;
         limpiarError();
@@ -921,6 +937,8 @@
     editando = null;
     paginaActual = 0;
     inputHora.value = '';
+    legendHora.textContent = 'Hora';
+    campoHora.classList.remove('editando');
     btnSubmit.textContent = 'Agregar';
     btnCancelar.hidden = true;
     limpiarError();
