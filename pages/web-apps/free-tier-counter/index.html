@@ -1,916 +1,457 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Tracker de capa gratuita</title>
-<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📆</text></svg>">
-<style>
-  :root {
-    color-scheme: dark;
-    --bg: #0a0a12;
-    --bg-panel: rgba(15, 15, 26, 0.7);
-    --cyan: #00f0ff;
-    --amber: #ffb800;
-    --red: #ff2b4a;
-    --green: #00ff9d;
-    --text: #c8d6e5;
-    --text-dim: #6a7a8a;
-    --border: rgba(0, 240, 255, 0.3);
-    --border-strong: rgba(0, 240, 255, 0.7);
-    --glow-sm: 0 0 6px rgba(0, 240, 255, 0.5);
-    --glow-md: 0 0 12px rgba(0, 240, 255, 0.5), inset 0 0 8px rgba(0, 240, 255, 0.15);
-    --mono: ui-monospace, "Cascadia Code", "JetBrains Mono", "Courier New", monospace;
-  }
-
-  * { box-sizing: border-box; }
-  html, body { margin: 0; padding: 0; }
-
-  body {
-    font-family: var(--mono);
-    color: var(--text);
-    background:
-      linear-gradient(rgba(0, 240, 255, 0.035) 1px, transparent 1px) 0 0 / 40px 40px,
-      linear-gradient(90deg, rgba(0, 240, 255, 0.035) 1px, transparent 1px) 0 0 / 40px 40px,
-      radial-gradient(circle at 50% 0%, rgba(255, 184, 0, 0.08), transparent 60%),
-      var(--bg);
-    height: 100vh;
-    overflow: hidden;
-    padding: 2rem 1rem;
-    line-height: 1.5;
-  }
-
-  .sr-only {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    padding: 0;
-    margin: -1px;
-    overflow: hidden;
-    clip: rect(0, 0, 0, 0);
-    white-space: nowrap;
-    border: 0;
-  }
-
-  main {
-    max-width: 720px;
-    height: 100%;
-    margin: 0 auto;
-    display: grid;
-    gap: 1.5rem;
-    grid-template-rows: auto auto auto auto;
-  }
-
-  /* ---------- Layout amplio: contador y form en la misma fila ---------- */
-  @media (min-width: 700px) {
-    main {
-      max-width: 1080px;
-      grid-template-columns: 1fr 1fr;
-      grid-template-areas:
-        "contador form"
-        "acciones acciones"
-        "tabla    tabla";
-      grid-template-rows: auto auto auto;
-    }
-    #seccion-contador { grid-area: contador; }
-    #seccion-form     { grid-area: form; }
-    .acciones         { grid-area: acciones; }
-    #seccion-tabla    { grid-area: tabla; }
-  }
-
-  section {
-    border: 1px solid var(--border);
-    background: var(--bg-panel);
-    padding: 1.25rem;
-    backdrop-filter: blur(2px);
-  }
-
-  h2 {
-    margin: 0 0 1rem;
-    font-size: 0.85rem;
-    letter-spacing: 0.2em;
-    text-transform: uppercase;
-    color: var(--amber);
-    text-shadow: 0 0 6px rgba(255, 184, 0, 0.5);
-  }
-
-  /* ---------- Contador ---------- */
-  #seccion-contador {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    justify-content: center;
-    column-gap: 0.6rem;
-    text-align: center;
-  }
-
-  #seccion-contador h2 {
-    margin: 0;
-    font-size: 1.2rem;
-  }
-
-  #seccion-contador p {
-    margin: 0;
-    display: flex;
-    align-items: baseline;
-    gap: 1rem;
-  }
-
-  #contador {
-    font-size: 1.8rem;
-    font-weight: bold;
-    color: var(--cyan);
-    text-shadow: 0 0 10px var(--cyan), 0 0 20px rgba(0, 240, 255, 0.4);
-    line-height: 1;
-    letter-spacing: 0.05em;
-  }
-
-  #seccion-contador small {
-    font-size: 1.2rem;
-    color: var(--text-dim);
-    letter-spacing: 0.1em;
-  }
-
-  #seccion-contador meter {
-    flex-basis: 100%;
-  }
-
-  meter {
-    width: 100%;
-    height: 1.4em;
-    display: block;
-    border: 1px solid var(--border);
-    background: rgba(0, 240, 255, 0.03);
-  }
-
-  meter::-webkit-meter-bar {
-    background: rgba(0, 240, 255, 0.05);
-    border: none;
-  }
-  meter::-webkit-meter-optimum-value {
-    background: var(--green);
-    box-shadow: 0 0 10px var(--green);
-    transition: width 250ms ease;
-  }
-  meter::-webkit-meter-suboptimum-value {
-    background: var(--amber);
-    box-shadow: 0 0 10px var(--amber);
-    transition: width 250ms ease;
-  }
-  meter::-webkit-meter-even-less-good-value {
-    background: var(--red);
-    box-shadow: 0 0 10px var(--red);
-    transition: width 250ms ease;
-  }
-  meter::-moz-meter-bar { background: var(--cyan); }
-
-  /* ---------- Formulario ---------- */
-  #seccion-form h2 {
-    font-size: 1.2rem;
-    margin: 0 0 0.5rem;
-  }
-
-  #campo-hora:not([hidden]) {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    justify-content: space-between;
-    gap: 0.5rem;
-    border: 0;
-    padding: 0.75rem;
-    margin: 0;
-    min-width: 0;
-  }
-
-  #campo-hora > legend {
-    flex-basis: 100%;
-    width: 100%;
-    padding: 0;
-    margin: 0 0 0.5rem 0;
-    border: 0;
-    float: none;
-    font-size: 0.9rem;
-    letter-spacing: 0.15em;
-    text-transform: uppercase;
-    color: var(--cyan);
-    font-weight: normal;
-    transition: color 150ms ease, text-shadow 150ms ease;
-  }
-
-  #campo-hora.editando > legend {
-    color: var(--amber);
-    text-shadow: 0 0 6px rgba(255, 184, 0, 0.5);
-  }
-
-  #campo-hora button {
-    min-width: 6.5rem;
-  }
-
-  input[type="time"] {
-    font-family: var(--mono);
-    font-size: 1rem;
-    padding: 0.5rem 0.75rem;
-    background: rgba(0, 240, 255, 0.05);
-    border: 1px solid var(--border);
-    color: var(--cyan);
-    color-scheme: dark;
-    transition: box-shadow 150ms ease, border-color 150ms ease;
-  }
-
-  input[type="time"]:hover:not(:disabled) { border-color: var(--border-strong); }
-
-  input[type="time"]:focus {
-    outline: 2px solid var(--cyan);
-    outline-offset: 2px;
-    box-shadow: var(--glow-sm);
-  }
-
-  input[type="time"]:disabled { opacity: 0.4; cursor: not-allowed; }
-
-  button {
-    font-family: var(--mono);
-    font-size: 0.85rem;
-    letter-spacing: 0.15em;
-    text-transform: uppercase;
-    padding: 0.5rem 1rem;
-    background: transparent;
-    border: 1px solid var(--cyan);
-    color: var(--cyan);
-    cursor: pointer;
-    transition:
-      box-shadow 150ms ease,
-      background-color 150ms ease,
-      color 150ms ease,
-      border-color 150ms ease,
-      text-shadow 150ms ease;
-  }
-
-  button:hover:not(:disabled),
-  button:focus-visible:not(:disabled) {
-    box-shadow: var(--glow-md);
-    text-shadow: 0 0 6px var(--cyan);
-    border-color: var(--border-strong);
-  }
-
-  button:active:not(:disabled) {
-    background: var(--cyan);
-    color: var(--bg);
-    text-shadow: none;
-    box-shadow: 0 0 16px var(--cyan);
-  }
-
-  button:focus-visible {
-    outline: 2px solid var(--cyan);
-    outline-offset: 2px;
-  }
-
-  button:disabled {
-    opacity: 0.35;
-    cursor: not-allowed;
-    border-color: var(--text-dim);
-    color: var(--text-dim);
-  }
-
-  #btn-cancelar {
-    border-color: var(--amber);
-    color: var(--amber);
-  }
-
-  #btn-cancelar:hover:not(:disabled),
-  #btn-cancelar:focus-visible:not(:disabled) {
-    box-shadow: 0 0 12px rgba(255, 184, 0, 0.5), inset 0 0 8px rgba(255, 184, 0, 0.15);
-    text-shadow: 0 0 6px var(--amber);
-    border-color: var(--amber);
-  }
-
-  #form-error {
-    margin: 0.5rem 0 0;
-    color: var(--red);
-    font-size: 0.85rem;
-    letter-spacing: 0.05em;
-  }
-
-  #form-finalizada {
-    margin: 0;
-    color: var(--amber);
-    font-size: 1rem;
-    letter-spacing: 0.15em;
-    text-transform: uppercase;
-    text-shadow: 0 0 8px rgba(255, 184, 0, 0.5);
-    text-align: center;
-    padding: 0.5rem 0;
-  }
-
-  /* ---------- Acciones (toolbar) ---------- */
-  .acciones {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    flex-wrap: wrap;
-  }
-
-  .acciones #btn-reiniciar {
-    margin-left: auto;
-  }
-
-  /* ---------- Tabla ---------- */
-  #seccion-tabla {
-    min-height: 0;
-    max-height: 325px;
-    overflow: hidden;
-    display: flex;
-    flex-direction: column;
-    gap: 0.75rem;
-  }
-
-  #tabla-scroll {
-    min-height: 0;
-    overflow-y: auto;
-  }
-
-  table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 0.95rem;
-    table-layout: fixed;
-  }
-
-  th, td {
-    padding: 0.6rem 0.8rem;
-    text-align: left;
-    border: 1px solid var(--border);
-    transition: border-color 150ms ease, box-shadow 150ms ease, background-color 150ms ease;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-
-  th {
-    font-size: 0.75rem;
-    letter-spacing: 0.15em;
-    text-transform: uppercase;
-    color: var(--amber);
-    text-shadow: 0 0 4px rgba(255, 184, 0, 0.3);
-    background: rgba(255, 184, 0, 0.04);
-    position: sticky;
-    top: 0;
-    z-index: 1;
-  }
-
-  /* Grupo 1: columnas 1-3. Grupo 2: columnas 4-6 */
-  th:nth-child(1), td:nth-child(1),
-  th:nth-child(4), td:nth-child(4) {
-    width: 3rem;
-    text-align: center;
-    color: var(--text-dim);
-  }
-
-  th:nth-child(3), td:nth-child(3),
-  th:nth-child(6), td:nth-child(6) {
-    width: 9rem;
-    text-align: center;
-  }
-
-  td:nth-child(3), td:nth-child(6) {
-    display: flex;
-    align-items: center;
-    justify-content: space-evenly;
-  }
-
-  /* Separador visual entre grupos (solo desktop) */
-  @media (min-width: 700px) {
-    th:nth-child(4), td:nth-child(4) {
-      border-left: 2px solid var(--border-strong);
-    }
-  }
-
-  td.placeholder {
-    color: rgba(106, 122, 138, 0.5);
-    user-select: none;
-  }
-
-  td.placeholder button {
-    visibility: hidden;
-    pointer-events: none;
-  }
-
-  tbody tr:hover { background: rgba(0, 240, 255, 0.06); }
-
-  tbody tr:hover td {
-    border-color: var(--border-strong);
-    box-shadow: inset 0 0 8px rgba(0, 240, 255, 0.12);
-  }
-
-  tbody tr.nueva { animation: fadeIn 150ms ease; }
-
-  @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(-4px); }
-    to   { opacity: 1; transform: translateY(0); }
-  }
-
-  td button {
-    box-sizing: border-box;
-    padding: 0.3rem 0;
-    width: 2.3rem;
-    height: 1.8rem;
-    font-size: 0.9rem;
-  }
-
-  td button + button {
-    margin-left: 0.8rem;
-  }
-
-  td button.peligro {
-    border-color: var(--red);
-    color: var(--red);
-  }
-
-  td button.peligro:hover:not(:disabled),
-  td button.peligro:focus-visible:not(:disabled) {
-    box-shadow: 0 0 12px rgba(255, 43, 74, 0.5), inset 0 0 8px rgba(255, 43, 74, 0.15);
-    text-shadow: 0 0 6px var(--red);
-    border-color: var(--red);
-  }
-
-  #tabla-vacia {
-    text-align: center;
-    color: var(--text-dim);
-    font-size: 0.85rem;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    margin: 0;
-    padding: 1rem;
-  }
-
-  /* ---------- Paginación ---------- */
-  #paginacion {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 1rem;
-    flex-shrink: 0;
-  }
-
-  #paginacion button {
-    padding: 0.35rem 0.85rem;
-  }
-
-  #pag-info {
-    color: var(--cyan);
-    font-size: 0.9rem;
-    letter-spacing: 0.15em;
-    min-width: 4rem;
-    text-align: center;
-    text-shadow: 0 0 6px rgba(0, 240, 255, 0.5);
-  }
-
-  /* ---------- Responsive ---------- */
-  @media (max-width: 480px) {
-    body { padding: 1rem 0.5rem; }
-    section { padding: 1rem; }
-    #contador { font-size: 2.5rem; }
-    form p { flex-direction: column; align-items: stretch; }
-    label { text-align: left; }
-    .acciones { justify-content: center; }
-    .acciones #btn-reiniciar { margin-left: 0; }
-    td:nth-child(3), td:nth-child(6) { width: 6.5rem; }
-    td button { width: 2rem; padding: 0.25rem 0; }
-    td button + button { margin-left: 0.4rem; }
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    *, *::before, *::after {
-      animation-duration: 0.01ms !important;
-      transition-duration: 0.01ms !important;
-    }
-  }
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Tracker de capa gratuita</title>
+  <link 
+    rel="icon"
+    href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📆</text></svg>"
+  >
+  <link rel="stylesheet" href="./assets/css/style.css">
 </head>
+
 <body>
-<main>
-  <h1 class="sr-only" id="titulo-app">Tracker de capa gratuita</h1>
+  <main>
+    <h1 class="sr-only" id="titulo-app">Tracker de capa gratuita</h1>
 
-  <section id="seccion-contador" aria-labelledby="contador-titulo">
-    <h2 id="contador-titulo">Usos disponibles:</h2>
-    <p>
-      <output id="contador" aria-live="polite">56</output>
-      <small>de 56</small>
-    </p>
-    <meter 
-      id="meter" 
-      min="0" 
-      max="56" 
-      low="10" 
-      high="40" 
-      optimum="56" 
-      value="56"
-      aria-label="Usos disponibles"
-    ></meter>
-  </section>
+    <section id="seccion-contador" aria-labelledby="contador-titulo">
+      <h2 id="contador-titulo">Usos disponibles:</h2>
+      <p>
+        <output id="contador" aria-live="polite">56</output>
+        <small>de 56</small>
+      </p>
+      <meter id="meter" min="0" max="56" low="10" high="40" optimum="56" value="56"
+        aria-label="Usos disponibles"></meter>
+    </section>
 
-  <section id="seccion-form" aria-labelledby="form-titulo">
-    <h2 id="form-titulo">Registrar uso</h2>
-    <form id="form" novalidate>
-      <fieldset id="campo-hora">
-        <legend id="legend-hora">Hora</legend>
-        <input type="time" id="hora" name="hora" required autocomplete="off">
-        <button type="submit" id="btn-submit">Agregar</button>
-        <button type="button" id="btn-cancelar" hidden>Cancelar</button>
-      </fieldset>
-      <p id="form-error" role="alert" hidden></p>
-    </form>
-    <p id="form-finalizada" role="status" hidden>Capa gratis finalizada</p>
-  </section>
+    <section id="seccion-form" aria-labelledby="form-titulo">
+      <h2 id="form-titulo">Registrar uso</h2>
+      <form id="form" novalidate>
+        <fieldset id="campo-hora">
+          <legend id="legend-hora">Hora</legend>
+          <input type="time" id="hora" name="hora" required autocomplete="off">
+          <button type="submit" id="btn-submit">Agregar</button>
+          <button type="button" id="btn-cancelar" hidden>Cancelar</button>
+        </fieldset>
+        <p id="form-error" role="alert" hidden></p>
+      </form>
+      <p id="form-finalizada" role="status" hidden>Capa gratis finalizada</p>
+    </section>
 
-  <section class="acciones" role="toolbar" aria-label="Acciones de datos" aria-orientation="horizontal">
-    <button type="button" id="btn-exportar">Exportar</button>
-    <button type="button" id="btn-importar">Importar</button>
-    <button type="button" id="btn-reiniciar">Reiniciar</button>
-    <input type="file" id="archivo" accept="application/json,.json" hidden>
-  </section>
+    <section class="acciones" role="toolbar" aria-label="Acciones de datos" aria-orientation="horizontal">
+      <button type="button" id="btn-exportar">Exportar</button>
+      <button type="button" id="btn-importar">Importar</button>
+      <button type="button" id="btn-reiniciar">Reiniciar</button>
+      <input type="file" id="archivo" accept="application/json,.json" hidden>
+    </section>
 
-  <section id="seccion-tabla" aria-labelledby="titulo-app">
-    <div id="tabla-scroll">
-      <table id="tabla">
-        <thead id="tabla-thead"></thead>
-        <tbody id="tbody"></tbody>
-      </table>
-    </div>
-    <p id="tabla-vacia">Sin registros todavía.</p>
-    <nav id="paginacion" aria-label="Paginación" hidden>
-      <button type="button" id="btn-pag-prev" aria-label="Página anterior">◀</button>
-      <output id="pag-info" aria-live="polite">1 / 1</output>
-      <button type="button" id="btn-pag-next" aria-label="Página siguiente">▶</button>
-    </nav>
-  </section>
-</main>
+    <section id="seccion-tabla" aria-labelledby="titulo-app">
+      <div id="tabla-scroll">
+        <table id="tabla">
+          <thead id="tabla-thead"></thead>
+          <tbody id="tbody"></tbody>
+        </table>
+      </div>
+      <p id="tabla-vacia">Sin registros todavía.</p>
+      <nav id="paginacion" aria-label="Paginación" hidden>
+        <button type="button" id="btn-pag-prev" aria-label="Página anterior">◀</button>
+        <output id="pag-info" aria-live="polite">1 / 1</output>
+        <button type="button" id="btn-pag-next" aria-label="Página siguiente">▶</button>
+      </nav>
+    </section>
+  </main>
 
-<script>
-(function () {
-  'use strict';
+  <script>
+    (function () {
+      'use strict';
 
-  const MAX = 56;
-  const TAM_PAGINA = 8;
-  const STORAGE_KEY = 'capaGratis.v1';
-  const HORA_RE = /^([01]\d|2[0-3]):[0-5]\d$/;
+      const MAX = 56;
+      const TAM_PAGINA = 8;
+      const STORAGE_KEY = 'capaGratis.v1';
+      const HORA_RE = /^([01]\d|2[0-3]):[0-5]\d$/;
 
-  const mqDesktop = window.matchMedia('(min-width: 700px)');
+      const mqDesktop = window.matchMedia('(min-width: 700px)');
 
-  const $ = (id) => document.getElementById(id);
-  const contadorEl     = $('contador');
-  const meterEl        = $('meter');
-  const form           = $('form');
-  const inputHora      = $('hora');
-  const btnSubmit      = $('btn-submit');
-  const btnCancelar    = $('btn-cancelar');
-  const formError      = $('form-error');
-  const formFinalizada = $('form-finalizada');
-  const campoHora      = $('campo-hora');
-  const legendHora     = $('legend-hora');
-  const tablaThead     = $('tabla-thead');
-  const tbody          = $('tbody');
-  const tablaVacia     = $('tabla-vacia');
-  const paginacion     = $('paginacion');
-  const btnPagPrev     = $('btn-pag-prev');
-  const btnPagNext     = $('btn-pag-next');
-  const pagInfo        = $('pag-info');
-  const btnExportar    = $('btn-exportar');
-  const btnImportar    = $('btn-importar');
-  const btnReiniciar   = $('btn-reiniciar');
-  const archivoInput   = $('archivo');
+      const $ = (id) => document.getElementById(id);
+      const contadorEl = $('contador');
+      const meterEl = $('meter');
+      const form = $('form');
+      const inputHora = $('hora');
+      const btnSubmit = $('btn-submit');
+      const btnCancelar = $('btn-cancelar');
+      const formError = $('form-error');
+      const formFinalizada = $('form-finalizada');
+      const campoHora = $('campo-hora');
+      const legendHora = $('legend-hora');
+      const tablaThead = $('tabla-thead');
+      const tbody = $('tbody');
+      const tablaVacia = $('tabla-vacia');
+      const paginacion = $('paginacion');
+      const btnPagPrev = $('btn-pag-prev');
+      const btnPagNext = $('btn-pag-next');
+      const pagInfo = $('pag-info');
+      const btnExportar = $('btn-exportar');
+      const btnImportar = $('btn-importar');
+      const btnReiniciar = $('btn-reiniciar');
+      const archivoInput = $('archivo');
 
-  let filas = [];
-  let editando = null;
-  let paginaActual = 0;
+      let filas = [];
+      let editando = null;
+      let paginaActual = 0;
 
-  // ---------- Persistencia ----------
-  function cargar() {
-    try {
-      const raw = localStorage.getItem(STORAGE_KEY);
-      if (!raw) return;
-      const data = JSON.parse(raw);
-      const validadas = validarFilas(data && data.filas);
-      if (validadas) filas = validadas;
-    } catch (_) { /* corrupto: arrancamos limpio */ }
-  }
-
-  function guardar() {
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify({ filas }));
-    } catch (_) { /* modo privado / cuota: ignoramos */ }
-  }
-
-  function validarFilas(data) {
-    if (!Array.isArray(data)) return null;
-    const out = [];
-    for (const item of data) {
-      if (!item || typeof item.hora !== 'string' || !HORA_RE.test(item.hora)) return null;
-      out.push({ hora: item.hora });
-    }
-    return out;
-  }
-
-  // ---------- Paginación helpers ----------
-  function totalPaginas() {
-    return Math.max(1, Math.ceil(filas.length / TAM_PAGINA));
-  }
-
-  function clampPagina() {
-    const t = totalPaginas();
-    if (paginaActual >= t) paginaActual = t - 1;
-    if (paginaActual < 0) paginaActual = 0;
-  }
-
-  // ---------- Mensajes ----------
-  function mostrarError(msg) {
-    formError.hidden = false;
-    formError.textContent = msg;
-  }
-  function limpiarError() {
-    formError.hidden = true;
-    formError.textContent = '';
-  }
-
-  // ---------- Construcción de la tabla ----------
-  function construirThead() {
-    tablaThead.textContent = '';
-    const tr = document.createElement('tr');
-    const grupos = mqDesktop.matches ? 2 : 1;
-    for (let g = 0; g < grupos; g++) {
-      for (const txt of ['#', 'Hora', 'Acciones']) {
-        const th = document.createElement('th');
-        th.scope = 'col';
-        th.textContent = txt;
-        tr.appendChild(th);
+      // ---------- Persistencia ----------
+      function cargar() {
+        try {
+          const raw = localStorage.getItem(STORAGE_KEY);
+          if (!raw) return;
+          const data = JSON.parse(raw);
+          const validadas = validarFilas(data && data.filas);
+          if (validadas) filas = validadas;
+        } catch (_) { /* corrupto: arrancamos limpio */ }
       }
-    }
-    tablaThead.appendChild(tr);
-  }
 
-  function crearCeldaIdx(n) {
-    const td = document.createElement('td');
-    td.textContent = String(n);
-    return td;
-  }
+      function guardar() {
+        try {
+          localStorage.setItem(STORAGE_KEY, JSON.stringify({ filas }));
+        } catch (_) { /* modo privado / cuota: ignoramos */ }
+      }
 
-  function crearCeldaHora(txt) {
-    const td = document.createElement('td');
-    td.textContent = txt;
-    return td;
-  }
+      function validarFilas(data) {
+        if (!Array.isArray(data)) return null;
+        const out = [];
+        for (const item of data) {
+          if (!item || typeof item.hora !== 'string' || !HORA_RE.test(item.hora)) return null;
+          out.push({ hora: item.hora });
+        }
+        return out;
+      }
 
-  function crearCeldaAcciones(idxGlobal) {
-    const td = document.createElement('td');
+      // ---------- Paginación helpers ----------
+      function totalPaginas() {
+        return Math.max(1, Math.ceil(filas.length / TAM_PAGINA));
+      }
 
-    const btnEditar = document.createElement('button');
-    btnEditar.type = 'button';
-    btnEditar.textContent = '✎';
-    btnEditar.setAttribute('aria-label', `Editar fila ${idxGlobal + 1}`);
-    btnEditar.addEventListener('click', () => iniciarEdicion(idxGlobal));
+      function clampPagina() {
+        const t = totalPaginas();
+        if (paginaActual >= t) paginaActual = t - 1;
+        if (paginaActual < 0) paginaActual = 0;
+      }
 
-    const btnEliminar = document.createElement('button');
-    btnEliminar.type = 'button';
-    btnEliminar.className = 'peligro';
-    btnEliminar.textContent = '×';
-    btnEliminar.setAttribute('aria-label', `Eliminar fila ${idxGlobal + 1}`);
-    btnEliminar.addEventListener('click', () => eliminarFila(idxGlobal));
+      // ---------- Mensajes ----------
+      function mostrarError(msg) {
+        formError.hidden = false;
+        formError.textContent = msg;
+      }
+      function limpiarError() {
+        formError.hidden = true;
+        formError.textContent = '';
+      }
 
-    td.append(btnEditar, btnEliminar);
-    return td;
-  }
-
-  function crearCeldasPlaceholder() {
-    const tdIdx = document.createElement('td');
-    tdIdx.textContent = '#';
-    tdIdx.className = 'placeholder';
-
-    const tdHora = document.createElement('td');
-    tdHora.textContent = '--:--';
-    tdHora.className = 'placeholder';
-
-    const tdAcc = document.createElement('td');
-    tdAcc.className = 'placeholder';
-
-    // Botones invisibles para preservar la altura de la fila
-    const b1 = document.createElement('button');
-    b1.type = 'button';
-    b1.textContent = '✎';
-    b1.tabIndex = -1;
-    b1.disabled = true;
-    b1.setAttribute('aria-hidden', 'true');
-
-    const b2 = document.createElement('button');
-    b2.type = 'button';
-    b2.textContent = '×';
-    b2.tabIndex = -1;
-    b2.disabled = true;
-    b2.setAttribute('aria-hidden', 'true');
-
-    tdAcc.append(b1, b2);
-
-    return [tdIdx, tdHora, tdAcc];
-  }
-
-  function crearCeldasGrupo(idxGlobal) {
-    if (idxGlobal >= filas.length) return crearCeldasPlaceholder();
-    return [
-      crearCeldaIdx(idxGlobal + 1),
-      crearCeldaHora(filas[idxGlobal].hora),
-      crearCeldaAcciones(idxGlobal),
-    ];
-  }
-
-  // ---------- Render ----------
-  function render(nuevaIdx = null) {
-    const disponibles = MAX - filas.length;
-
-    // Contador
-    contadorEl.textContent = String(disponibles);
-    meterEl.value = disponibles;
-    meterEl.setAttribute('aria-valuetext', `${disponibles} de ${MAX} usos disponibles`);
-
-    // Estado del formulario
-    const sinCupo = disponibles <= 0;
-    const bloqueado = sinCupo && editando === null;
-    campoHora.hidden      = bloqueado;
-    formFinalizada.hidden = !bloqueado;
-
-    // Paginación: clamps
-    clampPagina();
-    const total = totalPaginas();
-
-    // Thead
-    construirThead();
-
-    // Tbody
-    tbody.textContent = '';
-    const esDesktop = mqDesktop.matches;
-    const inicio = paginaActual * TAM_PAGINA;
-
-    if (filas.length === 0) {
-      // Sin filas: solo thead + mensaje. Sin placeholders.
-    } else if (esDesktop) {
-      // 4 filas × 6 celdas (grupo 1: inicio+i, grupo 2: inicio+4+i)
-      for (let i = 0; i < 4; i++) {
+      // ---------- Construcción de la tabla ----------
+      function construirThead() {
+        tablaThead.textContent = '';
         const tr = document.createElement('tr');
-        const idx1 = inicio + i;
-        const idx2 = inicio + 4 + i;
-        if (idx1 === nuevaIdx || idx2 === nuevaIdx) tr.classList.add('nueva');
-        tr.append(...crearCeldasGrupo(idx1));
-        tr.append(...crearCeldasGrupo(idx2));
-        tbody.appendChild(tr);
+        const grupos = mqDesktop.matches ? 2 : 1;
+        for (let g = 0; g < grupos; g++) {
+          for (const txt of ['#', 'Hora', 'Acciones']) {
+            const th = document.createElement('th');
+            th.scope = 'col';
+            th.textContent = txt;
+            tr.appendChild(th);
+          }
+        }
+        tablaThead.appendChild(tr);
       }
-    } else {
-      // 8 filas × 3 celdas
-      for (let i = 0; i < TAM_PAGINA; i++) {
-        const idx = inicio + i;
-        const tr = document.createElement('tr');
-        if (idx === nuevaIdx) tr.classList.add('nueva');
-        tr.append(...crearCeldasGrupo(idx));
-        tbody.appendChild(tr);
+
+      function crearCeldaIdx(n) {
+        const td = document.createElement('td');
+        td.textContent = String(n);
+        return td;
       }
-    }
 
-    // Empty state
-    tablaVacia.hidden = filas.length > 0;
+      function crearCeldaHora(txt) {
+        const td = document.createElement('td');
+        td.textContent = txt;
+        return td;
+      }
 
-    // Paginador
-    const mostrarPag = total > 1;
-    paginacion.hidden = !mostrarPag;
-    if (mostrarPag) {
-      pagInfo.textContent = `${paginaActual + 1} / ${total}`;
-      btnPagPrev.disabled = editando !== null || paginaActual === 0;
-      btnPagNext.disabled = editando !== null || paginaActual >= total - 1;
-    }
+      function crearCeldaAcciones(idxGlobal) {
+        const td = document.createElement('td');
 
-  }
+        const btnEditar = document.createElement('button');
+        btnEditar.type = 'button';
+        btnEditar.textContent = '✎';
+        btnEditar.setAttribute('aria-label', `Editar fila ${idxGlobal + 1}`);
+        btnEditar.addEventListener('click', () => iniciarEdicion(idxGlobal));
 
-  // ---------- Navegación ----------
-  function irAPagina(n) {
-    if (editando !== null) return;
-    const total = totalPaginas();
-    if (n < 0 || n >= total) return;
-    paginaActual = n;
-    render();
-  }
+        const btnEliminar = document.createElement('button');
+        btnEliminar.type = 'button';
+        btnEliminar.className = 'peligro';
+        btnEliminar.textContent = '×';
+        btnEliminar.setAttribute('aria-label', `Eliminar fila ${idxGlobal + 1}`);
+        btnEliminar.addEventListener('click', () => eliminarFila(idxGlobal));
 
-  // ---------- Edición ----------
-  function iniciarEdicion(idx) {
-    editando = idx;
-    paginaActual = Math.floor(idx / TAM_PAGINA);
-    inputHora.value = filas[idx].hora;
-    legendHora.textContent = `Editando fila #${idx + 1}`;
-    campoHora.classList.add('editando');
-    btnSubmit.textContent = 'Guardar';
-    btnCancelar.hidden = false;
-    limpiarError();
-    render();
-    inputHora.focus();
-  }
+        td.append(btnEditar, btnEliminar);
+        return td;
+      }
 
-  function cancelarEdicion() {
-    editando = null;
-    inputHora.value = '';
-    legendHora.textContent = 'Hora';
-    campoHora.classList.remove('editando');
-    btnSubmit.textContent = 'Agregar';
-    btnCancelar.hidden = true;
-    limpiarError();
-    render();
-    inputHora.focus();
-  }
+      function crearCeldasPlaceholder() {
+        const tdIdx = document.createElement('td');
+        tdIdx.textContent = '#';
+        tdIdx.className = 'placeholder';
 
-  // ---------- Acciones ----------
-  function eliminarFila(idx) {
-    if (editando === idx) {
-      editando = null;
-      inputHora.value = '';
-      legendHora.textContent = 'Hora';
-      campoHora.classList.remove('editando');
-      btnSubmit.textContent = 'Agregar';
-      btnCancelar.hidden = true;
-    } else if (editando !== null && editando > idx) {
-      editando -= 1;
-    }
-    filas.splice(idx, 1);
-    guardar();
-    limpiarError();
-    render();
-  }
+        const tdHora = document.createElement('td');
+        tdHora.textContent = '--:--';
+        tdHora.className = 'placeholder';
 
-  function enviarFormulario(e) {
-    e.preventDefault();
-    limpiarError();
+        const tdAcc = document.createElement('td');
+        tdAcc.className = 'placeholder';
 
-    const valor = inputHora.value;
-    if (!valor || !HORA_RE.test(valor)) {
-      mostrarError('Ingresá una hora válida (HH:MM).');
-      inputHora.focus();
-      return;
-    }
+        // Botones invisibles para preservar la altura de la fila
+        const b1 = document.createElement('button');
+        b1.type = 'button';
+        b1.textContent = '✎';
+        b1.tabIndex = -1;
+        b1.disabled = true;
+        b1.setAttribute('aria-hidden', 'true');
 
-    if (editando !== null) {
-      filas[editando].hora = valor;
-      const idxEditado = editando;
-      editando = null;
-      inputHora.value = '';
-      legendHora.textContent = 'Hora';
-      campoHora.classList.remove('editando');
-      btnSubmit.textContent = 'Agregar';
-      btnCancelar.hidden = true;
-      guardar();
-      render(idxEditado);
-      inputHora.focus();
-      return;
-    }
+        const b2 = document.createElement('button');
+        b2.type = 'button';
+        b2.textContent = '×';
+        b2.tabIndex = -1;
+        b2.disabled = true;
+        b2.setAttribute('aria-hidden', 'true');
 
-    if (MAX - filas.length <= 0) {
-      mostrarError('No quedan usos disponibles.');
-      return;
-    }
-    filas.push({ hora: valor });
-    const idxNuevo = filas.length - 1;
-    paginaActual = Math.floor(idxNuevo / TAM_PAGINA);
-    guardar();
-    inputHora.value = '';
-    render(idxNuevo);
-    inputHora.focus();
-  }
+        tdAcc.append(b1, b2);
 
-  // ---------- Export / Import ----------
-  function exportar() {
-    const data = JSON.stringify({ filas }, null, 2);
-    const blob = new Blob([data], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `capa-gratis-${new Date().toISOString().slice(0, 10)}.json`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    setTimeout(() => URL.revokeObjectURL(url), 0);
-  }
+        return [tdIdx, tdHora, tdAcc];
+      }
 
-  function importarArchivo(file) {
-    const reader = new FileReader();
-    reader.onload = () => {
-      try {
-        const data = JSON.parse(String(reader.result));
-        const candidatas = validarFilas(Array.isArray(data) ? data : data.filas);
-        if (!candidatas) {
-          mostrarError('El archivo no tiene un formato válido.');
+      function crearCeldasGrupo(idxGlobal) {
+        if (idxGlobal >= filas.length) return crearCeldasPlaceholder();
+        return [
+          crearCeldaIdx(idxGlobal + 1),
+          crearCeldaHora(filas[idxGlobal].hora),
+          crearCeldaAcciones(idxGlobal),
+        ];
+      }
+
+      // ---------- Render ----------
+      function render(nuevaIdx = null) {
+        const disponibles = MAX - filas.length;
+
+        // Contador
+        contadorEl.textContent = String(disponibles);
+        meterEl.value = disponibles;
+        meterEl.setAttribute('aria-valuetext', `${disponibles} de ${MAX} usos disponibles`);
+
+        // Estado del formulario
+        const sinCupo = disponibles <= 0;
+        const bloqueado = sinCupo && editando === null;
+        campoHora.hidden = bloqueado;
+        formFinalizada.hidden = !bloqueado;
+
+        // Paginación: clamps
+        clampPagina();
+        const total = totalPaginas();
+
+        // Thead
+        construirThead();
+
+        // Tbody
+        tbody.textContent = '';
+        const esDesktop = mqDesktop.matches;
+        const inicio = paginaActual * TAM_PAGINA;
+
+        if (filas.length === 0) {
+          // Sin filas: solo thead + mensaje. Sin placeholders.
+        } else if (esDesktop) {
+          // 4 filas × 6 celdas (grupo 1: inicio+i, grupo 2: inicio+4+i)
+          for (let i = 0; i < 4; i++) {
+            const tr = document.createElement('tr');
+            const idx1 = inicio + i;
+            const idx2 = inicio + 4 + i;
+            if (idx1 === nuevaIdx || idx2 === nuevaIdx) tr.classList.add('nueva');
+            tr.append(...crearCeldasGrupo(idx1));
+            tr.append(...crearCeldasGrupo(idx2));
+            tbody.appendChild(tr);
+          }
+        } else {
+          // 8 filas × 3 celdas
+          for (let i = 0; i < TAM_PAGINA; i++) {
+            const idx = inicio + i;
+            const tr = document.createElement('tr');
+            if (idx === nuevaIdx) tr.classList.add('nueva');
+            tr.append(...crearCeldasGrupo(idx));
+            tbody.appendChild(tr);
+          }
+        }
+
+        // Empty state
+        tablaVacia.hidden = filas.length > 0;
+
+        // Paginador
+        const mostrarPag = total > 1;
+        paginacion.hidden = !mostrarPag;
+        if (mostrarPag) {
+          pagInfo.textContent = `${paginaActual + 1} / ${total}`;
+          btnPagPrev.disabled = editando !== null || paginaActual === 0;
+          btnPagNext.disabled = editando !== null || paginaActual >= total - 1;
+        }
+
+      }
+
+      // ---------- Navegación ----------
+      function irAPagina(n) {
+        if (editando !== null) return;
+        const total = totalPaginas();
+        if (n < 0 || n >= total) return;
+        paginaActual = n;
+        render();
+      }
+
+      // ---------- Edición ----------
+      function iniciarEdicion(idx) {
+        editando = idx;
+        paginaActual = Math.floor(idx / TAM_PAGINA);
+        inputHora.value = filas[idx].hora;
+        legendHora.textContent = `Editando fila #${idx + 1}`;
+        campoHora.classList.add('editando');
+        btnSubmit.textContent = 'Guardar';
+        btnCancelar.hidden = false;
+        limpiarError();
+        render();
+        inputHora.focus();
+      }
+
+      function cancelarEdicion() {
+        editando = null;
+        inputHora.value = '';
+        legendHora.textContent = 'Hora';
+        campoHora.classList.remove('editando');
+        btnSubmit.textContent = 'Agregar';
+        btnCancelar.hidden = true;
+        limpiarError();
+        render();
+        inputHora.focus();
+      }
+
+      // ---------- Acciones ----------
+      function eliminarFila(idx) {
+        if (editando === idx) {
+          editando = null;
+          inputHora.value = '';
+          legendHora.textContent = 'Hora';
+          campoHora.classList.remove('editando');
+          btnSubmit.textContent = 'Agregar';
+          btnCancelar.hidden = true;
+        } else if (editando !== null && editando > idx) {
+          editando -= 1;
+        }
+        filas.splice(idx, 1);
+        guardar();
+        limpiarError();
+        render();
+      }
+
+      function enviarFormulario(e) {
+        e.preventDefault();
+        limpiarError();
+
+        const valor = inputHora.value;
+        if (!valor || !HORA_RE.test(valor)) {
+          mostrarError('Ingresá una hora válida (HH:MM).');
+          inputHora.focus();
           return;
         }
-        if (candidatas.length > MAX) {
-          mostrarError(`El archivo tiene ${candidatas.length} filas; el máximo es ${MAX}.`);
+
+        if (editando !== null) {
+          filas[editando].hora = valor;
+          const idxEditado = editando;
+          editando = null;
+          inputHora.value = '';
+          legendHora.textContent = 'Hora';
+          campoHora.classList.remove('editando');
+          btnSubmit.textContent = 'Agregar';
+          btnCancelar.hidden = true;
+          guardar();
+          render(idxEditado);
+          inputHora.focus();
           return;
         }
-        const ok = confirm(
-          `Se reemplazarán los registros actuales (${filas.length}) ` +
-          `por los del archivo (${candidatas.length}). ¿Continuar?`
-        );
+
+        if (MAX - filas.length <= 0) {
+          mostrarError('No quedan usos disponibles.');
+          return;
+        }
+        filas.push({ hora: valor });
+        const idxNuevo = filas.length - 1;
+        paginaActual = Math.floor(idxNuevo / TAM_PAGINA);
+        guardar();
+        inputHora.value = '';
+        render(idxNuevo);
+        inputHora.focus();
+      }
+
+      // ---------- Export / Import ----------
+      function exportar() {
+        const data = JSON.stringify({ filas }, null, 2);
+        const blob = new Blob([data], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `capa-gratis-${new Date().toISOString().slice(0, 10)}.json`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        setTimeout(() => URL.revokeObjectURL(url), 0);
+      }
+
+      function importarArchivo(file) {
+        const reader = new FileReader();
+        reader.onload = () => {
+          try {
+            const data = JSON.parse(String(reader.result));
+            const candidatas = validarFilas(Array.isArray(data) ? data : data.filas);
+            if (!candidatas) {
+              mostrarError('El archivo no tiene un formato válido.');
+              return;
+            }
+            if (candidatas.length > MAX) {
+              mostrarError(`El archivo tiene ${candidatas.length} filas; el máximo es ${MAX}.`);
+              return;
+            }
+            const ok = confirm(
+              `Se reemplazarán los registros actuales (${filas.length}) ` +
+              `por los del archivo (${candidatas.length}). ¿Continuar?`
+            );
+            if (!ok) return;
+            filas = candidatas;
+            editando = null;
+            paginaActual = 0;
+            inputHora.value = '';
+            legendHora.textContent = 'Hora';
+            campoHora.classList.remove('editando');
+            btnSubmit.textContent = 'Agregar';
+            btnCancelar.hidden = true;
+            limpiarError();
+            guardar();
+            render();
+          } catch (_) {
+            mostrarError('No se pudo leer el archivo.');
+          }
+        };
+        reader.onerror = () => mostrarError('No se pudo leer el archivo.');
+        reader.readAsText(file);
+      }
+
+      // ---------- Reset ----------
+      function reiniciar() {
+        const ok = confirm('Se borrarán todos los registros y el contador volverá a 56. ¿Continuar?');
         if (!ok) return;
-        filas = candidatas;
+        filas = [];
         editando = null;
         paginaActual = 0;
         inputHora.value = '';
@@ -919,60 +460,38 @@
         btnSubmit.textContent = 'Agregar';
         btnCancelar.hidden = true;
         limpiarError();
-        guardar();
+        try { localStorage.removeItem(STORAGE_KEY); } catch (_) { }
         render();
-      } catch (_) {
-        mostrarError('No se pudo leer el archivo.');
+        inputHora.focus();
       }
-    };
-    reader.onerror = () => mostrarError('No se pudo leer el archivo.');
-    reader.readAsText(file);
-  }
 
-  // ---------- Reset ----------
-  function reiniciar() {
-    const ok = confirm('Se borrarán todos los registros y el contador volverá a 56. ¿Continuar?');
-    if (!ok) return;
-    filas = [];
-    editando = null;
-    paginaActual = 0;
-    inputHora.value = '';
-    legendHora.textContent = 'Hora';
-    campoHora.classList.remove('editando');
-    btnSubmit.textContent = 'Agregar';
-    btnCancelar.hidden = true;
-    limpiarError();
-    try { localStorage.removeItem(STORAGE_KEY); } catch (_) {}
-    render();
-    inputHora.focus();
-  }
+      // ---------- Eventos ----------
+      form.addEventListener('submit', enviarFormulario);
+      btnCancelar.addEventListener('click', cancelarEdicion);
 
-  // ---------- Eventos ----------
-  form.addEventListener('submit', enviarFormulario);
-  btnCancelar.addEventListener('click', cancelarEdicion);
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && editando !== null) cancelarEdicion();
+      });
 
-  document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape' && editando !== null) cancelarEdicion();
-  });
+      btnExportar.addEventListener('click', exportar);
+      btnImportar.addEventListener('click', () => archivoInput.click());
+      archivoInput.addEventListener('change', () => {
+        const file = archivoInput.files && archivoInput.files[0];
+        if (file) importarArchivo(file);
+        archivoInput.value = '';
+      });
+      btnReiniciar.addEventListener('click', reiniciar);
 
-  btnExportar.addEventListener('click', exportar);
-  btnImportar.addEventListener('click', () => archivoInput.click());
-  archivoInput.addEventListener('change', () => {
-    const file = archivoInput.files && archivoInput.files[0];
-    if (file) importarArchivo(file);
-    archivoInput.value = '';
-  });
-  btnReiniciar.addEventListener('click', reiniciar);
+      btnPagPrev.addEventListener('click', () => irAPagina(paginaActual - 1));
+      btnPagNext.addEventListener('click', () => irAPagina(paginaActual + 1));
 
-  btnPagPrev.addEventListener('click', () => irAPagina(paginaActual - 1));
-  btnPagNext.addEventListener('click', () => irAPagina(paginaActual + 1));
+      mqDesktop.addEventListener('change', () => render());
 
-  mqDesktop.addEventListener('change', () => render());
-
-  // ---------- Inicio ----------
-  cargar();
-  render();
-})();
-</script>
+      // ---------- Inicio ----------
+      cargar();
+      render();
+    })();
+  </script>
 </body>
+
 </html>
