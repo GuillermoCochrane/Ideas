@@ -95,29 +95,44 @@
   }
 
   /* ---------- Contador ---------- */
-  #seccion-contador { text-align: center; }
+  #seccion-contador {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    column-gap: 0.6rem;
+    text-align: center;
+  }
+
+  #seccion-contador h2 {
+    margin: 0;
+    font-size: 1.2rem;
+  }
 
   #seccion-contador p {
-    margin: 0 0 0.75rem;
+    margin: 0;
     display: flex;
     align-items: baseline;
-    justify-content: center;
-    gap: 0.5rem;
+    gap: 1rem;
   }
 
   #contador {
-    font-size: 3.5rem;
+    font-size: 1.8rem;
     font-weight: bold;
     color: var(--cyan);
-    text-shadow: 0 0 14px var(--cyan), 0 0 30px rgba(0, 240, 255, 0.4);
+    text-shadow: 0 0 10px var(--cyan), 0 0 20px rgba(0, 240, 255, 0.4);
     line-height: 1;
     letter-spacing: 0.05em;
   }
 
   #seccion-contador small {
-    font-size: 1rem;
+    font-size: 1.2rem;
     color: var(--text-dim);
     letter-spacing: 0.1em;
+  }
+
+  #seccion-contador meter {
+    flex-basis: 100%;
   }
 
   meter {
@@ -458,13 +473,21 @@
   <h1 class="sr-only" id="titulo-app">Tracker de capa gratuita</h1>
 
   <section id="seccion-contador" aria-labelledby="contador-titulo">
-    <h2 id="contador-titulo">Usos disponibles</h2>
+    <h2 id="contador-titulo">Usos disponibles:</h2>
     <p>
       <output id="contador" aria-live="polite">56</output>
       <small>de 56</small>
     </p>
-    <meter id="meter" min="0" max="56" low="10" high="40" optimum="56" value="56"
-           aria-label="Usos disponibles"></meter>
+    <meter 
+      id="meter" 
+      min="0" 
+      max="56" 
+      low="10" 
+      high="40" 
+      optimum="56" 
+      value="56"
+      aria-label="Usos disponibles"
+    ></meter>
   </section>
 
   <section id="seccion-form" aria-labelledby="form-titulo">
