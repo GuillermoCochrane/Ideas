@@ -2,7 +2,7 @@
 
 # dependencies
 /node_modules
-/cosas_referencia
+**/cosas_referencia
 test.js
 #/src/views/reference.ejs
 #/public/assets
