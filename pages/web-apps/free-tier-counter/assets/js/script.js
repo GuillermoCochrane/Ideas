@@ -1,7 +1,7 @@
 (function () {
   "use strict";
 
-  const MAX = 56;
+  const MAX = 65;
   const TAM_PAGINA = 8;
   const STORAGE_KEY = "capaGratis.v1";
   const HORA_RE = /^([01]\d|2[0-3]):[0-5]\d$/;
@@ -395,7 +395,7 @@
   // ---------- Reset ----------
   function reiniciar() {
     const ok = confirm(
-      "Se borrarán todos los registros y el contador volverá a 56. ¿Continuar?",
+      "Se borrarán todos los registros y el contador volverá a 65. ¿Continuar?",
     );
     if (!ok) return;
     filas = [];
