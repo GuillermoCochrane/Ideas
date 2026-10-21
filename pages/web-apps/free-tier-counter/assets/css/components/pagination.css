@@ -1,0 +1,22 @@
+/* ? Estilos de la paginación */
+
+#paginacion {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  flex-shrink: 0;
+}
+
+#paginacion button {
+  padding: 0.35rem 0.85rem;
+}
+
+#pag-info {
+  color: var(--cyan);
+  font-size: 0.9rem;
+  letter-spacing: 0.15em;
+  min-width: 4rem;
+  text-align: center;
+  text-shadow: 0 0 6px rgba(0, 240, 255, 0.5);
+}
