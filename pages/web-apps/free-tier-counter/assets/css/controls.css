@@ -9,21 +9,21 @@ input[type="time"] {
   color: var(--cyan);
   color-scheme: dark;
   transition: box-shadow 150ms ease, border-color 150ms ease;
-}
 
-input[type="time"]:hover:not(:disabled) { 
-  border-color: var(--border-strong); 
-}
+  &:hover:not(:disabled) { 
+    border-color: var(--border-strong); 
+  }
 
-input[type="time"]:focus {
-  outline: 2px solid var(--cyan);
-  outline-offset: 2px;
-  box-shadow: var(--glow-sm);
-}
+  &:focus {
+    outline: 2px solid var(--cyan);
+    outline-offset: 2px;
+    box-shadow: var(--glow-sm);
+  }
 
-input[type="time"]:disabled { 
-  opacity: 0.4; 
-  cursor: not-allowed; 
+  &:disabled { 
+    opacity: 0.4; 
+    cursor: not-allowed; 
+  }
 }
 
 button {
@@ -42,32 +42,32 @@ button {
     color 150ms ease,
     border-color 150ms ease,
     text-shadow 150ms ease;
-}
 
-button:hover:not(:disabled),
-button:focus-visible:not(:disabled) {
-  box-shadow: var(--glow-md);
-  text-shadow: 0 0 6px var(--cyan);
-  border-color: var(--border-strong);
-}
+  &:hover:not(:disabled),
+  &:focus-visible:not(:disabled) {
+    box-shadow: var(--glow-md);
+    text-shadow: 0 0 6px var(--cyan);
+    border-color: var(--border-strong);
+  }
 
-button:active:not(:disabled) {
-  background: var(--cyan);
-  color: var(--bg);
-  text-shadow: none;
-  box-shadow: 0 0 16px var(--cyan);
-}
+  &:active:not(:disabled) {
+    background: var(--cyan);
+    color: var(--bg);
+    text-shadow: none;
+    box-shadow: 0 0 16px var(--cyan);
+  }
 
-button:focus-visible {
-  outline: 2px solid var(--cyan);
-  outline-offset: 2px;
-}
+  &:focus-visible {
+    outline: 2px solid var(--cyan);
+    outline-offset: 2px;
+  }
 
-button:disabled {
-  opacity: 0.35;
-  cursor: not-allowed;
-  border-color: var(--text-dim);
-  color: var(--text-dim);
+  &:disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
+    border-color: var(--text-dim);
+    color: var(--text-dim);
+  }
 }
 
 meter {
@@ -76,31 +76,31 @@ meter {
   display: block;
   border: 1px solid var(--border);
   background: rgba(0, 240, 255, 0.03);
-}
 
-meter::-webkit-meter-bar {
-  background: rgba(0, 240, 255, 0.05);
-  border: none;
-}
+  &::-webkit-meter-bar {
+    background: rgba(0, 240, 255, 0.05);
+    border: none;
+  }
 
-meter::-webkit-meter-optimum-value {
-  background: var(--green);
-  box-shadow: 0 0 10px var(--green);
-  transition: width 250ms ease;
-}
+  &::-webkit-meter-optimum-value {
+    background: var(--green);
+    box-shadow: 0 0 10px var(--green);
+    transition: width 250ms ease;
+  }
 
-meter::-webkit-meter-suboptimum-value {
-  background: var(--amber);
-  box-shadow: 0 0 10px var(--amber);
-  transition: width 250ms ease;
-}
+  &::-webkit-meter-suboptimum-value {
+    background: var(--amber);
+    box-shadow: 0 0 10px var(--amber);
+    transition: width 250ms ease;
+  }
 
-meter::-webkit-meter-even-less-good-value {
-  background: var(--red);
-  box-shadow: 0 0 10px var(--red);
-  transition: width 250ms ease;
-}
+  &::-webkit-meter-even-less-good-value {
+    background: var(--red);
+    box-shadow: 0 0 10px var(--red);
+    transition: width 250ms ease;
+  }
 
-meter::-moz-meter-bar { 
-  background: var(--cyan); 
+  &::-moz-meter-bar { 
+    background: var(--cyan); 
+  }
 }
