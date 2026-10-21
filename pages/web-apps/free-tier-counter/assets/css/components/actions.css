@@ -1,0 +1,12 @@
+/* ? Estilos de la barra de acciones (Exportar, Importar, Reiniciar) */
+
+.acciones {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.acciones #btn-reiniciar {
+  margin-left: auto;
+}

@@ -7,18 +7,6 @@
 @import url("./components/counter.css");
 @import url("./components/form.css");
 
-  /* ---------- Acciones (toolbar) ---------- */
-  .acciones {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    flex-wrap: wrap;
-  }
-
-  .acciones #btn-reiniciar {
-    margin-left: auto;
-  }
-
   /* ---------- Tabla ---------- */
   #seccion-tabla {
     min-height: 0;
