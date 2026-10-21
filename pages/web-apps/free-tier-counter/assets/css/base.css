@@ -42,6 +42,23 @@ main {
   display: grid;
   gap: 1.5rem;
   grid-template-rows: auto auto auto auto;
+
+  /* Asignación de áreas del grid */
+  & #seccion-contador { grid-area: contador; }
+  & #seccion-form     { grid-area: form; }
+  & .acciones         { grid-area: acciones; }
+  & #seccion-tabla    { grid-area: tabla; }
+
+  /* Layout amplio para Desktop */
+  @media (min-width: 700px) {
+    max-width: 1080px;
+    grid-template-columns: 1fr 1fr;
+    grid-template-areas:
+      "contador form"
+      "acciones acciones"
+      "tabla    tabla";
+    grid-template-rows: auto auto auto;
+  }
 }
 
 section {
@@ -58,21 +75,4 @@ h2 {
   text-transform: uppercase;
   color: var(--amber);
   text-shadow: 0 0 6px rgba(255, 184, 0, 0.5);
-}
-
-/* Layout amplio para Desktop */
-@media (min-width: 700px) {
-  main {
-    max-width: 1080px;
-    grid-template-columns: 1fr 1fr;
-    grid-template-areas:
-      "contador form"
-      "acciones acciones"
-      "tabla    tabla";
-    grid-template-rows: auto auto auto;
-  }
-  #seccion-contador { grid-area: contador; }
-  #seccion-form     { grid-area: form; }
-  .acciones         { grid-area: acciones; }
-  #seccion-tabla    { grid-area: tabla; }
 }
