@@ -44,10 +44,10 @@ main {
   grid-template-rows: auto auto auto auto;
 
   /* Asignación de áreas del grid */
-  & #seccion-contador { grid-area: contador; }
-  & #seccion-form     { grid-area: form; }
-  & .acciones         { grid-area: acciones; }
-  & #seccion-tabla    { grid-area: tabla; }
+  #seccion-contador { grid-area: contador; }
+  #seccion-form     { grid-area: form; }
+  .acciones         { grid-area: acciones; }
+  #seccion-tabla    { grid-area: tabla; }
 
   /* Layout amplio para Desktop */
   @media (min-width: 700px) {
