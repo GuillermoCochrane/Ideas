@@ -6,10 +6,10 @@
   justify-content: center;
   gap: 1rem;
   flex-shrink: 0;
-}
 
-#paginacion button {
-  padding: 0.35rem 0.85rem;
+  button {
+    padding: 0.35rem 0.85rem;
+  }
 }
 
 #pag-info {
