@@ -1,0 +1,18 @@
+/* ? Variables globales y tema (Cyberpunk) */
+
+:root {
+  color-scheme: dark;
+  --bg: #0a0a12;
+  --bg-panel: rgba(15, 15, 26, 0.7);
+  --cyan: #00f0ff;
+  --amber: #ffb800;
+  --red: #ff2b4a;
+  --green: #00ff9d;
+  --text: #c8d6e5;
+  --text-dim: #6a7a8a;
+  --border: rgba(0, 240, 255, 0.3);
+  --border-strong: rgba(0, 240, 255, 0.7);
+  --glow-sm: 0 0 6px rgba(0, 240, 255, 0.5);
+  --glow-md: 0 0 12px rgba(0, 240, 255, 0.5), inset 0 0 8px rgba(0, 240, 255, 0.15);
+  --mono: ui-monospace, "Cascadia Code", "JetBrains Mono", "Courier New", monospace;
+}
