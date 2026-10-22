@@ -1,6 +1,7 @@
 //? orquestador encargado de manejar la aplicación
 
 import { validarFilas } from "./utilities/validators.js";
+import { getStorageItem, setStorageItem, removeStorageItem, descargarJSON, leerArchivoTexto } from './core/storage.js';
 
 const MAX = 65;
 const TAM_PAGINA = 8;
@@ -38,23 +39,77 @@ let paginaActual = 0;
 
 // ---------- Persistencia ----------
 function cargar() {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) return;
-    const data = JSON.parse(raw);
-    const validadas = validarFilas(data && data.filas, HORA_RE);
-    if (validadas) filas = validadas;
-  } catch (_) {
-    /* corrupto: arrancamos limpio */
-  }
+  const data = getStorageItem(STORAGE_KEY);
+  if (!data) return;
+  const validadas = validarFilas(data && data.filas, HORA_RE);
+  if (validadas) filas = validadas;
 }
 
 function guardar() {
-  try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify({ filas }));
-  } catch (_) {
-    /* modo privado / cuota: ignoramos */
-  }
+  setStorageItem(STORAGE_KEY, { filas });
+}
+
+// ---------- Export / Import ----------
+function exportar() {
+  const filename = `capa-gratis-${new Date().toISOString().slice(0, 10)}.json`;
+  descargarJSON({ filas }, filename);
+}
+
+function importarArchivo(file) {
+  leerArchivoTexto(file, (data) => {
+    const candidatas = validarFilas(Array.isArray(data) ? data : data.filas, HORA_RE);
+    if (!candidatas) {
+      mostrarError("El archivo no tiene un formato válido.");
+      return;
+    }
+    if (candidatas.length > MAX) {
+      mostrarError(
+        `El archivo tiene ${candidatas.length} filas; el máximo es ${MAX}.`,
+      );
+      return;
+    }
+    const ok = confirm(
+      `Se reemplazarán los registros actuales (${filas.length}) ` +
+        `por los del archivo (${candidatas.length}). ¿Continuar?`,
+    );
+    if (!ok) return;
+    
+    filas = candidatas;
+    editando = null;
+    paginaActual = 0;
+    inputHora.value = "";
+    legendHora.textContent = "Hora";
+    campoHora.classList.remove("editando");
+    btnSubmit.textContent = "Agregar";
+    btnCancelar.hidden = true;
+    limpiarError();
+    guardar();
+    render();
+  }, () => {
+    mostrarError("No se pudo leer el archivo.");
+  });
+}
+
+// ---------- Reset ----------
+function reiniciar() {
+  const ok = confirm(
+    "Se borrarán todos los registros y el contador volverá a 65. ¿Continuar?",
+  );
+  if (!ok) return;
+  filas = [];
+  editando = null;
+  paginaActual = 0;
+  inputHora.value = "";
+  legendHora.textContent = "Hora";
+  campoHora.classList.remove("editando");
+  btnSubmit.textContent = "Agregar";
+  btnCancelar.hidden = true;
+  limpiarError();
+  
+  removeStorageItem(STORAGE_KEY);
+  
+  render();
+  inputHora.focus();
 }
 
 // ---------- Paginación helpers ----------
@@ -326,81 +381,7 @@ function enviarFormulario(e) {
   inputHora.focus();
 }
 
-// ---------- Export / Import ----------
-function exportar() {
-  const data = JSON.stringify({ filas }, null, 2);
-  const blob = new Blob([data], { type: "application/json" });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = `capa-gratis-${new Date().toISOString().slice(0, 10)}.json`;
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-  setTimeout(() => URL.revokeObjectURL(url), 0);
-}
 
-function importarArchivo(file) {
-  const reader = new FileReader();
-  reader.onload = () => {
-    try {
-      const data = JSON.parse(String(reader.result));
-      const candidatas = validarFilas(Array.isArray(data) ? data : data.filas, HORA_RE);
-      if (!candidatas) {
-        mostrarError("El archivo no tiene un formato válido.");
-        return;
-      }
-      if (candidatas.length > MAX) {
-        mostrarError(
-          `El archivo tiene ${candidatas.length} filas; el máximo es ${MAX}.`,
-        );
-        return;
-      }
-      const ok = confirm(
-        `Se reemplazarán los registros actuales (${filas.length}) ` +
-          `por los del archivo (${candidatas.length}). ¿Continuar?`,
-      );
-      if (!ok) return;
-      filas = candidatas;
-      editando = null;
-      paginaActual = 0;
-      inputHora.value = "";
-      legendHora.textContent = "Hora";
-      campoHora.classList.remove("editando");
-      btnSubmit.textContent = "Agregar";
-      btnCancelar.hidden = true;
-      limpiarError();
-      guardar();
-      render();
-    } catch (_) {
-      mostrarError("No se pudo leer el archivo.");
-    }
-  };
-  reader.onerror = () => mostrarError("No se pudo leer el archivo.");
-  reader.readAsText(file);
-}
-
-// ---------- Reset ----------
-function reiniciar() {
-  const ok = confirm(
-    "Se borrarán todos los registros y el contador volverá a 65. ¿Continuar?",
-  );
-  if (!ok) return;
-  filas = [];
-  editando = null;
-  paginaActual = 0;
-  inputHora.value = "";
-  legendHora.textContent = "Hora";
-  campoHora.classList.remove("editando");
-  btnSubmit.textContent = "Agregar";
-  btnCancelar.hidden = true;
-  limpiarError();
-  try {
-    localStorage.removeItem(STORAGE_KEY);
-  } catch (_) {}
-  render();
-  inputHora.focus();
-}
 
 // ---------- Eventos ----------
 form.addEventListener("submit", enviarFormulario);
