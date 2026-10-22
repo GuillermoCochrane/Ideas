@@ -1,5 +1,7 @@
 //? orquestador encargado de manejar la aplicación
 
+import { validarFilas } from "./utilities/validators.js";
+
 const MAX = 65;
 const TAM_PAGINA = 8;
 const STORAGE_KEY = "capaGratis.v1";
@@ -40,7 +42,7 @@ function cargar() {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) return;
     const data = JSON.parse(raw);
-    const validadas = validarFilas(data && data.filas);
+    const validadas = validarFilas(data && data.filas, HORA_RE);
     if (validadas) filas = validadas;
   } catch (_) {
     /* corrupto: arrancamos limpio */
@@ -53,17 +55,6 @@ function guardar() {
   } catch (_) {
     /* modo privado / cuota: ignoramos */
   }
-}
-
-function validarFilas(data) {
-  if (!Array.isArray(data)) return null;
-  const out = [];
-  for (const item of data) {
-    if (!item || typeof item.hora !== "string" || !HORA_RE.test(item.hora))
-      return null;
-    out.push({ hora: item.hora });
-  }
-  return out;
 }
 
 // ---------- Paginación helpers ----------
@@ -354,7 +345,7 @@ function importarArchivo(file) {
   reader.onload = () => {
     try {
       const data = JSON.parse(String(reader.result));
-      const candidatas = validarFilas(Array.isArray(data) ? data : data.filas);
+      const candidatas = validarFilas(Array.isArray(data) ? data : data.filas, HORA_RE);
       if (!candidatas) {
         mostrarError("El archivo no tiene un formato válido.");
         return;
