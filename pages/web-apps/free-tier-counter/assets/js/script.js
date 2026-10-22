@@ -1,7 +1,7 @@
 //? orquestador encargado de manejar la aplicación
 
 import { validarFilas } from "./utilities/validators.js";
-import { getStorageItem, setStorageItem, removeStorageItem, descargarJSON, leerArchivoTexto } from './core/storage.js';
+import { cargar, guardar, exportar, removeStorageItem, leerArchivoJSON } from './core/storage.js';
 import { construirThead, crearCeldasGrupo } from './components/tabla.js';
 
 const MAX = 65;
@@ -38,26 +38,9 @@ let filas = [];
 let editando = null;
 let paginaActual = 0;
 
-// ---------- Persistencia ----------
-function cargar() {
-  const data = getStorageItem(STORAGE_KEY);
-  if (!data) return;
-  const validadas = validarFilas(data && data.filas, HORA_RE);
-  if (validadas) filas = validadas;
-}
-
-function guardar() {
-  setStorageItem(STORAGE_KEY, { filas });
-}
-
 // ---------- Export / Import ----------
-function exportar() {
-  const filename = `capa-gratis-${new Date().toISOString().slice(0, 10)}.json`;
-  descargarJSON({ filas }, filename);
-}
-
 function importarArchivo(file) {
-  leerArchivoTexto(file, (data) => {
+  leerArchivoJSON(file, (data) => {
     const candidatas = validarFilas(Array.isArray(data) ? data : data.filas, HORA_RE);
     if (!candidatas) {
       mostrarError("El archivo no tiene un formato válido.");
@@ -84,10 +67,10 @@ function importarArchivo(file) {
     btnSubmit.textContent = "Agregar";
     btnCancelar.hidden = true;
     limpiarError();
-    guardar();
+    guardar(STORAGE_KEY, filas);
     render();
-  }, () => {
-    mostrarError("No se pudo leer el archivo.");
+  }, (errorMsg) => {
+    mostrarError(errorMsg);
   });
 }
 
@@ -156,7 +139,7 @@ function render(nuevaIdx = null) {
   clampPagina();
   const total = totalPaginas();
 
-    // Thead
+  // Thead
   construirThead(tablaThead, mqDesktop.matches);
 
   // Tbody
@@ -167,6 +150,7 @@ function render(nuevaIdx = null) {
   if (filas.length === 0) {
     // Sin filas: solo thead + mensaje. Sin placeholders.
   } else if (esDesktop) {
+    // 4 filas × 6 celdas (grupo 1: inicio+i, grupo 2: inicio+4+i)
     for (let i = 0; i < 4; i++) {
       const tr = document.createElement("tr");
       const idx1 = inicio + i;
@@ -178,6 +162,7 @@ function render(nuevaIdx = null) {
       tbody.appendChild(tr);
     }
   } else {
+    // 8 filas × 3 celdas
     for (let i = 0; i < TAM_PAGINA; i++) {
       const idx = inicio + i;
       const tr = document.createElement("tr");
@@ -249,7 +234,7 @@ function eliminarFila(idx) {
     editando -= 1;
   }
   filas.splice(idx, 1);
-  guardar();
+  guardar(STORAGE_KEY, filas);
   limpiarError();
   render();
 }
@@ -274,7 +259,7 @@ function enviarFormulario(e) {
     campoHora.classList.remove("editando");
     btnSubmit.textContent = "Agregar";
     btnCancelar.hidden = true;
-    guardar();
+    guardar(STORAGE_KEY, filas);
     render(idxEditado);
     inputHora.focus();
     return;
@@ -287,13 +272,11 @@ function enviarFormulario(e) {
   filas.push({ hora: valor });
   const idxNuevo = filas.length - 1;
   paginaActual = Math.floor(idxNuevo / TAM_PAGINA);
-  guardar();
+  guardar(STORAGE_KEY, filas);
   inputHora.value = "";
   render(idxNuevo);
   inputHora.focus();
 }
-
-
 
 // ---------- Eventos ----------
 form.addEventListener("submit", enviarFormulario);
@@ -303,7 +286,7 @@ document.addEventListener("keydown", (e) => {
   if (e.key === "Escape" && editando !== null) cancelarEdicion();
 });
 
-btnExportar.addEventListener("click", exportar);
+btnExportar.addEventListener("click", () => exportar(filas));
 btnImportar.addEventListener("click", () => archivoInput.click());
 archivoInput.addEventListener("change", () => {
   const file = archivoInput.files && archivoInput.files[0];
@@ -318,5 +301,5 @@ btnPagNext.addEventListener("click", () => irAPagina(paginaActual + 1));
 mqDesktop.addEventListener("change", () => render());
 
 // ---------- Inicio ----------
-cargar();
+filas = cargar(STORAGE_KEY, HORA_RE);
 render();

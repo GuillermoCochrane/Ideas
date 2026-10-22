@@ -1,18 +1,21 @@
-// ? Manejo de persistencia en localStorage y archivos (APIs nativas)
+// ? Responsabilidad: Persistencia y Archivos
+import { validarFilas } from "../utilities/validators.js";
 
-export function getStorageItem(key) {
+export function cargar(STORAGE_KEY, HORA_RE) {
   try {
-    const raw = localStorage.getItem(key);
-    if (!raw) return null;
-    return JSON.parse(raw);
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return [];
+    const data = JSON.parse(raw);
+    const validadas = validarFilas(data && data.filas, HORA_RE);
+    return validadas || [];
   } catch (_) {
-    return null;
+    return [];
   }
 }
 
-export function setStorageItem(key, data) {
+export function guardar(STORAGE_KEY, filas) {
   try {
-    localStorage.setItem(key, JSON.stringify(data));
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({ filas }));
   } catch (_) {
     /* modo privado / cuota: ignoramos */
   }
@@ -24,29 +27,32 @@ export function removeStorageItem(key) {
   } catch (_) {}
 }
 
-export function descargarJSON(data, filename) {
-  const json = JSON.stringify(data, null, 2);
-  const blob = new Blob([json], { type: "application/json" });
+export function exportar(filas) {
+  const data = JSON.stringify({ filas }, null, 2);
+  const blob = new Blob([data], { type: "application/json" });
   const url = URL.createObjectURL(blob);
+  
+  const filename = `capa-gratis-${new Date().toISOString().slice(0, 10)}.json`;
   const a = document.createElement("a");
   a.href = url;
   a.download = filename;
+  
   document.body.appendChild(a);
   a.click();
   document.body.removeChild(a);
   setTimeout(() => URL.revokeObjectURL(url), 0);
 }
 
-export function leerArchivoTexto(file, onSuccess, onError) {
+export function leerArchivoJSON(file, onSuccess, onError) {
   const reader = new FileReader();
   reader.onload = () => {
     try {
       const data = JSON.parse(String(reader.result));
       onSuccess(data);
-    } catch (e) {
-      onError(e);
+    } catch (_) {
+      onError("No se pudo leer el archivo.");
     }
   };
-  reader.onerror = () => onError(new Error("No se pudo leer el archivo."));
+  reader.onerror = () => onError("No se pudo leer el archivo.");
   reader.readAsText(file);
 }
