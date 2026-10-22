@@ -2,6 +2,7 @@
 
 import { validarFilas } from "./utilities/validators.js";
 import { getStorageItem, setStorageItem, removeStorageItem, descargarJSON, leerArchivoTexto } from './core/storage.js';
+import { construirThead, crearCeldasGrupo } from './components/tabla.js';
 
 const MAX = 65;
 const TAM_PAGINA = 8;
@@ -133,95 +134,6 @@ function limpiarError() {
   formError.textContent = "";
 }
 
-// ---------- Construcción de la tabla ----------
-function construirThead() {
-  tablaThead.textContent = "";
-  const tr = document.createElement("tr");
-  const grupos = mqDesktop.matches ? 2 : 1;
-  for (let g = 0; g < grupos; g++) {
-    for (const txt of ["#", "Hora", "Acciones"]) {
-      const th = document.createElement("th");
-      th.scope = "col";
-      th.textContent = txt;
-      tr.appendChild(th);
-    }
-  }
-  tablaThead.appendChild(tr);
-}
-
-function crearCeldaIdx(n) {
-  const td = document.createElement("td");
-  td.textContent = String(n);
-  return td;
-}
-
-function crearCeldaHora(txt) {
-  const td = document.createElement("td");
-  td.textContent = txt;
-  return td;
-}
-
-function crearCeldaAcciones(idxGlobal) {
-  const td = document.createElement("td");
-
-  const btnEditar = document.createElement("button");
-  btnEditar.type = "button";
-  btnEditar.textContent = "✎";
-  btnEditar.setAttribute("aria-label", `Editar fila ${idxGlobal + 1}`);
-  btnEditar.addEventListener("click", () => iniciarEdicion(idxGlobal));
-
-  const btnEliminar = document.createElement("button");
-  btnEliminar.type = "button";
-  btnEliminar.className = "peligro";
-  btnEliminar.textContent = "×";
-  btnEliminar.setAttribute("aria-label", `Eliminar fila ${idxGlobal + 1}`);
-  btnEliminar.addEventListener("click", () => eliminarFila(idxGlobal));
-
-  td.append(btnEditar, btnEliminar);
-  return td;
-}
-
-function crearCeldasPlaceholder() {
-  const tdIdx = document.createElement("td");
-  tdIdx.textContent = "#";
-  tdIdx.className = "placeholder";
-
-  const tdHora = document.createElement("td");
-  tdHora.textContent = "--:--";
-  tdHora.className = "placeholder";
-
-  const tdAcc = document.createElement("td");
-  tdAcc.className = "placeholder";
-
-  // Botones invisibles para preservar la altura de la fila
-  const b1 = document.createElement("button");
-  b1.type = "button";
-  b1.textContent = "✎";
-  b1.tabIndex = -1;
-  b1.disabled = true;
-  b1.setAttribute("aria-hidden", "true");
-
-  const b2 = document.createElement("button");
-  b2.type = "button";
-  b2.textContent = "×";
-  b2.tabIndex = -1;
-  b2.disabled = true;
-  b2.setAttribute("aria-hidden", "true");
-
-  tdAcc.append(b1, b2);
-
-  return [tdIdx, tdHora, tdAcc];
-}
-
-function crearCeldasGrupo(idxGlobal) {
-  if (idxGlobal >= filas.length) return crearCeldasPlaceholder();
-  return [
-    crearCeldaIdx(idxGlobal + 1),
-    crearCeldaHora(filas[idxGlobal].hora),
-    crearCeldaAcciones(idxGlobal),
-  ];
-}
-
 // ---------- Render ----------
 function render(nuevaIdx = null) {
   const disponibles = MAX - filas.length;
@@ -244,8 +156,8 @@ function render(nuevaIdx = null) {
   clampPagina();
   const total = totalPaginas();
 
-  // Thead
-  construirThead();
+    // Thead
+  construirThead(tablaThead, mqDesktop.matches);
 
   // Tbody
   tbody.textContent = "";
@@ -255,23 +167,23 @@ function render(nuevaIdx = null) {
   if (filas.length === 0) {
     // Sin filas: solo thead + mensaje. Sin placeholders.
   } else if (esDesktop) {
-    // 4 filas × 6 celdas (grupo 1: inicio+i, grupo 2: inicio+4+i)
     for (let i = 0; i < 4; i++) {
       const tr = document.createElement("tr");
       const idx1 = inicio + i;
       const idx2 = inicio + 4 + i;
       if (idx1 === nuevaIdx || idx2 === nuevaIdx) tr.classList.add("nueva");
-      tr.append(...crearCeldasGrupo(idx1));
-      tr.append(...crearCeldasGrupo(idx2));
+      
+      tr.append(...crearCeldasGrupo(idx1, filas, iniciarEdicion, eliminarFila));
+      tr.append(...crearCeldasGrupo(idx2, filas, iniciarEdicion, eliminarFila));
       tbody.appendChild(tr);
     }
   } else {
-    // 8 filas × 3 celdas
     for (let i = 0; i < TAM_PAGINA; i++) {
       const idx = inicio + i;
       const tr = document.createElement("tr");
       if (idx === nuevaIdx) tr.classList.add("nueva");
-      tr.append(...crearCeldasGrupo(idx));
+      
+      tr.append(...crearCeldasGrupo(idx, filas, iniciarEdicion, eliminarFila));
       tbody.appendChild(tr);
     }
   }
