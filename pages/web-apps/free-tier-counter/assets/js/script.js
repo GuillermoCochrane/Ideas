@@ -3,6 +3,7 @@
 import { validarFilas } from "./utilities/validators.js";
 import { cargar, guardar, exportar, removeStorageItem } from './core/storage.js';
 import { construirThead, crearCeldasGrupo } from './components/tabla.js';
+import { totalPaginas, clampPagina } from './hanlders/pagination.js';
 
 const MAX = 65;
 const TAM_PAGINA = 8;
@@ -109,17 +110,6 @@ function reiniciar() {
   inputHora.focus();
 }
 
-// ---------- Paginación helpers ----------
-function totalPaginas() {
-  return Math.max(1, Math.ceil(filas.length / TAM_PAGINA));
-}
-
-function clampPagina() {
-  const t = totalPaginas();
-  if (paginaActual >= t) paginaActual = t - 1;
-  if (paginaActual < 0) paginaActual = 0;
-}
-
 // ---------- Mensajes ----------
 function mostrarError(msg) {
   formError.hidden = false;
@@ -149,8 +139,8 @@ function render(nuevaIdx = null) {
   formFinalizada.hidden = !bloqueado;
 
   // Paginación: clamps
-  clampPagina();
-  const total = totalPaginas();
+  const total = totalPaginas(filas, TAM_PAGINA);
+  paginaActual = clampPagina(paginaActual, total);
 
   // Thead
   construirThead(tablaThead, mqDesktop.matches);
@@ -202,7 +192,7 @@ function render(nuevaIdx = null) {
 // ---------- Navegación ----------
 function irAPagina(n) {
   if (editando !== null) return;
-  const total = totalPaginas();
+  const total = totalPaginas(filas, TAM_PAGINA);
   if (n < 0 || n >= total) return;
   paginaActual = n;
   render();
