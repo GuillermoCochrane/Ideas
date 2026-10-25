@@ -271,27 +271,41 @@ function enviarFormulario(e) {
 }
 
 // ---------- Eventos ----------
-form.addEventListener("submit", enviarFormulario);
-btnCancelar.addEventListener("click", cancelarEdicion);
+// ---------- Inicialización de Eventos ----------
+function initFormEvents() {
+  form.addEventListener("submit", enviarFormulario);
+  btnCancelar.addEventListener("click", cancelarEdicion);
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && editando !== null) cancelarEdicion();
+  });
+}
 
-document.addEventListener("keydown", (e) => {
-  if (e.key === "Escape" && editando !== null) cancelarEdicion();
-});
+function initDataEvents() {
+  btnExportar.addEventListener("click", () => exportar(filas));
+  btnImportar.addEventListener("click", () => archivoInput.click());
+  archivoInput.addEventListener("change", () => {
+    const file = archivoInput.files && archivoInput.files[0];
+    if (file) importarArchivo(file);
+    archivoInput.value = "";
+  });
+  btnReiniciar.addEventListener("click", reiniciar);
+}
 
-btnExportar.addEventListener("click", () => exportar(filas));
-btnImportar.addEventListener("click", () => archivoInput.click());
-archivoInput.addEventListener("change", () => {
-  const file = archivoInput.files && archivoInput.files[0];
-  if (file) importarArchivo(file);
-  archivoInput.value = "";
-});
-btnReiniciar.addEventListener("click", reiniciar);
+function initPaginationEvents() {
+  btnPagPrev.addEventListener("click", () => irAPagina(paginaActual - 1));
+  btnPagNext.addEventListener("click", () => irAPagina(paginaActual + 1));
+}
 
-btnPagPrev.addEventListener("click", () => irAPagina(paginaActual - 1));
-btnPagNext.addEventListener("click", () => irAPagina(paginaActual + 1));
-
-mqDesktop.addEventListener("change", () => render());
+function initLayoutEvents() {
+  mqDesktop.addEventListener("change", () => render());
+}
 
 // ---------- Inicio ----------
 filas = cargar(STORAGE_KEY, HORA_RE);
+
+initFormEvents();
+initDataEvents();
+initPaginationEvents();
+initLayoutEvents();
+
 render();
