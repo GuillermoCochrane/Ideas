@@ -3,7 +3,8 @@
 import { validarFilas } from "./utilities/validators.js";
 import { cargar, guardar, exportar, removeStorageItem } from './core/storage.js';
 import { construirThead, crearCeldasGrupo } from './components/tabla.js';
-import { totalPaginas, clampPagina } from './hanlders/pagination.js';
+import { totalPaginas, clampPagina } from './handlers/pagination.js';
+import { mostrarError, limpiarError } from './handlers/errors.js';
 
 const MAX = 65;
 const TAM_PAGINA = 8;
@@ -51,13 +52,11 @@ function importarArchivo(file) {
       const candidatas = validarFilas(Array.isArray(data) ? data : data.filas, HORA_RE);
       
       if (!candidatas) {
-        mostrarError("El archivo no tiene un formato válido.");
+        mostrarError(formError, "El archivo no tiene un formato válido.");
         return;
       }
       if (candidatas.length > MAX) {
-        mostrarError(
-          `El archivo tiene ${candidatas.length} filas; el máximo es ${MAX}.`,
-        );
+        mostrarError(formError, `El archivo tiene ${candidatas.length} filas; el máximo es ${MAX}.`);
         return;
       }
       const ok = confirm(
@@ -74,17 +73,17 @@ function importarArchivo(file) {
       campoHora.classList.remove("editando");
       btnSubmit.textContent = "Agregar";
       btnCancelar.hidden = true;
-      limpiarError();
+      limpiarError(formError);
       
       // Ajuste 2: Pasamos los parámetros a guardar
       guardar(STORAGE_KEY, filas);
       
       render();
     } catch (_) {
-      mostrarError("No se pudo leer el archivo.");
+      mostrarError(formError, "No se pudo leer el archivo.");
     }
   };
-  reader.onerror = () => mostrarError("No se pudo leer el archivo.");
+  reader.onerror = () => mostrarError(formError, "No se pudo leer el archivo.");
   reader.readAsText(file);
 }
 
@@ -102,22 +101,12 @@ function reiniciar() {
   campoHora.classList.remove("editando");
   btnSubmit.textContent = "Agregar";
   btnCancelar.hidden = true;
-  limpiarError();
+  limpiarError(formError);
   
   removeStorageItem(STORAGE_KEY);
   
   render();
   inputHora.focus();
-}
-
-// ---------- Mensajes ----------
-function mostrarError(msg) {
-  formError.hidden = false;
-  formError.textContent = msg;
-}
-function limpiarError() {
-  formError.hidden = true;
-  formError.textContent = "";
 }
 
 // ---------- Render ----------
@@ -207,7 +196,7 @@ function iniciarEdicion(idx) {
   campoHora.classList.add("editando");
   btnSubmit.textContent = "Guardar";
   btnCancelar.hidden = false;
-  limpiarError();
+  limpiarError(formError);
   render();
   inputHora.focus();
 }
@@ -219,7 +208,7 @@ function cancelarEdicion() {
   campoHora.classList.remove("editando");
   btnSubmit.textContent = "Agregar";
   btnCancelar.hidden = true;
-  limpiarError();
+  limpiarError(formError);
   render();
   inputHora.focus();
 }
@@ -238,17 +227,17 @@ function eliminarFila(idx) {
   }
   filas.splice(idx, 1);
   guardar(STORAGE_KEY, filas);
-  limpiarError();
+  limpiarError(formError);
   render();
 }
 
 function enviarFormulario(e) {
   e.preventDefault();
-  limpiarError();
+  limpiarError(formError);
 
   const valor = inputHora.value;
   if (!valor || !HORA_RE.test(valor)) {
-    mostrarError("Ingresá una hora válida (HH:MM).");
+    mostrarError(formError, "Ingresá una hora válida (HH:MM).");
     inputHora.focus();
     return;
   }
@@ -269,7 +258,7 @@ function enviarFormulario(e) {
   }
 
   if (MAX - filas.length <= 0) {
-    mostrarError("No quedan usos disponibles.");
+    mostrarError(formError, "No quedan usos disponibles.");
     return;
   }
   filas.push({ hora: valor });
