@@ -42,17 +42,3 @@ export function exportar(filas) {
   document.body.removeChild(a);
   setTimeout(() => URL.revokeObjectURL(url), 0);
 }
-
-export function leerArchivoJSON(file, onSuccess, onError) {
-  const reader = new FileReader();
-  reader.onload = () => {
-    try {
-      const data = JSON.parse(String(reader.result));
-      onSuccess(data);
-    } catch (_) {
-      onError("No se pudo leer el archivo.");
-    }
-  };
-  reader.onerror = () => onError("No se pudo leer el archivo.");
-  reader.readAsText(file);
-}

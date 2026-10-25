@@ -1,7 +1,7 @@
 //? orquestador encargado de manejar la aplicación
 
 import { validarFilas } from "./utilities/validators.js";
-import { cargar, guardar, exportar, removeStorageItem, leerArchivoJSON } from './core/storage.js';
+import { cargar, guardar, exportar, removeStorageItem } from './core/storage.js';
 import { construirThead, crearCeldasGrupo } from './components/tabla.js';
 
 const MAX = 65;
@@ -38,40 +38,53 @@ let filas = [];
 let editando = null;
 let paginaActual = 0;
 
+
 // ---------- Export / Import ----------
 function importarArchivo(file) {
-  leerArchivoJSON(file, (data) => {
-    const candidatas = validarFilas(Array.isArray(data) ? data : data.filas, HORA_RE);
-    if (!candidatas) {
-      mostrarError("El archivo no tiene un formato válido.");
-      return;
-    }
-    if (candidatas.length > MAX) {
-      mostrarError(
-        `El archivo tiene ${candidatas.length} filas; el máximo es ${MAX}.`,
+  const reader = new FileReader();
+  reader.onload = () => {
+    try {
+      const data = JSON.parse(String(reader.result));
+      
+      // Ajuste 1: Pasamos HORA_RE
+      const candidatas = validarFilas(Array.isArray(data) ? data : data.filas, HORA_RE);
+      
+      if (!candidatas) {
+        mostrarError("El archivo no tiene un formato válido.");
+        return;
+      }
+      if (candidatas.length > MAX) {
+        mostrarError(
+          `El archivo tiene ${candidatas.length} filas; el máximo es ${MAX}.`,
+        );
+        return;
+      }
+      const ok = confirm(
+        `Se reemplazarán los registros actuales (${filas.length}) ` +
+          `por los del archivo (${candidatas.length}). ¿Continuar?`,
       );
-      return;
+      if (!ok) return;
+      
+      filas = candidatas;
+      editando = null;
+      paginaActual = 0;
+      inputHora.value = "";
+      legendHora.textContent = "Hora";
+      campoHora.classList.remove("editando");
+      btnSubmit.textContent = "Agregar";
+      btnCancelar.hidden = true;
+      limpiarError();
+      
+      // Ajuste 2: Pasamos los parámetros a guardar
+      guardar(STORAGE_KEY, filas);
+      
+      render();
+    } catch (_) {
+      mostrarError("No se pudo leer el archivo.");
     }
-    const ok = confirm(
-      `Se reemplazarán los registros actuales (${filas.length}) ` +
-        `por los del archivo (${candidatas.length}). ¿Continuar?`,
-    );
-    if (!ok) return;
-    
-    filas = candidatas;
-    editando = null;
-    paginaActual = 0;
-    inputHora.value = "";
-    legendHora.textContent = "Hora";
-    campoHora.classList.remove("editando");
-    btnSubmit.textContent = "Agregar";
-    btnCancelar.hidden = true;
-    limpiarError();
-    guardar(STORAGE_KEY, filas);
-    render();
-  }, (errorMsg) => {
-    mostrarError(errorMsg);
-  });
+  };
+  reader.onerror = () => mostrarError("No se pudo leer el archivo.");
+  reader.readAsText(file);
 }
 
 // ---------- Reset ----------
