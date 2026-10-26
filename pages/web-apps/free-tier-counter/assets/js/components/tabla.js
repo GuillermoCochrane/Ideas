@@ -1,5 +1,5 @@
 // ? Constructores de la tabla
-import { createElement } from '../utilities/dom.js';
+import { createElement, createButton } from '../utilities/dom.js';
 
 export function construirThead($tablaThead, esDesktop) {
   $tablaThead.textContent = "";
@@ -27,15 +27,8 @@ export function crearCeldaHora(txt) {
 export function crearCeldaAcciones(idxGlobal, onEdit, onDelete) {
   const $td = createElement("td");
 
-  const $btnEditar = createElement("button", null, "✎");
-  $btnEditar.type = "button";
-  $btnEditar.setAttribute("aria-label", `Editar fila ${idxGlobal + 1}`);
-  $btnEditar.addEventListener("click", () => onEdit(idxGlobal));
-
-  const $btnEliminar = createElement("button", "peligro", "×");
-  $btnEliminar.type = "button";
-  $btnEliminar.setAttribute("aria-label", `Eliminar fila ${idxGlobal + 1}`);
-  $btnEliminar.addEventListener("click", () => onDelete(idxGlobal));
+  const $btnEditar = createButton("✎", null, `Editar fila ${idxGlobal + 1}`, () => onEdit(idxGlobal));
+  const $btnEliminar = createButton("×", "peligro", `Eliminar fila ${idxGlobal + 1}`, () => onDelete(idxGlobal));
 
   $td.append($btnEditar, $btnEliminar);
   return $td;
@@ -46,18 +39,8 @@ export function crearCeldasPlaceholder() {
   const $tdHora = createElement("td", "placeholder", "--:--");
   const $tdAcc = createElement("td", "placeholder");
 
-  // Botones invisibles para preservar la altura de la fila
-  const $b1 = createElement("button", null, "✎");
-  $b1.type = "button";
-  $b1.tabIndex = -1;
-  $b1.disabled = true;
-  $b1.setAttribute("aria-hidden", "true");
-
-  const $b2 = createElement("button", null, "×");
-  $b2.type = "button";
-  $b2.tabIndex = -1;
-  $b2.disabled = true;
-  $b2.setAttribute("aria-hidden", "true");
+  const $b1 = createButton("✎", null, null, null, true);
+  const $b2 = createButton("×", null, null, null, true);
 
   $tdAcc.append($b1, $b2);
 
