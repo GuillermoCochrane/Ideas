@@ -1,15 +1,14 @@
 // ? Constructores de la tabla
-import { createElement, createButton } from '../utilities/dom.js';
+import { createRow, createCell, createButton, createHeader } from '../utilities/dom.js';
 
 export function construirThead($tablaThead, esDesktop) {
   $tablaThead.textContent = "";
-  const $tr = createElement("tr");
+  const $tr = createRow();
   const grupos = esDesktop ? 2 : 1;
   
   for (let g = 0; g < grupos; g++) {
     for (const txt of ["#", "Hora", "Acciones"]) {
-      const $th = createElement("th", null, txt); 
-      $th.scope = "col";
+      const $th = createHeader(txt); 
       $tr.appendChild($th);
     }
   }
@@ -17,15 +16,15 @@ export function construirThead($tablaThead, esDesktop) {
 }
 
 export function crearCeldaIdx(n) {
-  return createElement("td", null, String(n));
+  return createCell(null, String(n));
 }
 
 export function crearCeldaHora(txt) {
-  return createElement("td", null, txt);
+  return createCell(null, txt);
 }
 
 export function crearCeldaAcciones(idxGlobal, onEdit, onDelete) {
-  const $td = createElement("td");
+  const $td = createCell();
 
   const $btnEditar = createButton("✎", null, `Editar fila ${idxGlobal + 1}`, () => onEdit(idxGlobal));
   const $btnEliminar = createButton("×", "peligro", `Eliminar fila ${idxGlobal + 1}`, () => onDelete(idxGlobal));
@@ -35,9 +34,9 @@ export function crearCeldaAcciones(idxGlobal, onEdit, onDelete) {
 }
 
 export function crearCeldasPlaceholder() {
-  const $tdIdx = createElement("td", "placeholder", "#");
-  const $tdHora = createElement("td", "placeholder", "--:--");
-  const $tdAcc = createElement("td", "placeholder");
+  const $tdIdx = createCell("placeholder", "#");
+  const $tdHora = createCell("placeholder", "--:--");
+  const $tdAcc = createCell("placeholder");
 
   const $b1 = createButton("✎", null, null, null, true);
   const $b2 = createButton("×", null, null, null, true);
