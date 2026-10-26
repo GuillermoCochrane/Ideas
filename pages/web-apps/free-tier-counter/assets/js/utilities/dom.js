@@ -39,3 +39,20 @@ export function createButton(text, className = null, ariaLabel = null, onClick =
 
     return $btn;
 }
+
+//* Crear elemento de celda de tabla (td)
+export function createCell(className = null, content = null) {
+    return createElement("td", className, content);
+}
+
+//* Crear elemento de fila de tabla (tr)
+export function createRow(className = null) {
+    return createElement("tr", className);
+}
+
+//* Crear elemento de cabecera de tabla (th)
+export function createHeader(content = null, scope = "col") {
+    const $th = createElement("th", null, content);
+    if (scope) $th.scope = scope;
+    return $th;
+}
