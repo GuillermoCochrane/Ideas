@@ -22,3 +22,20 @@ export function createElement(tagName, className = null, content = null, isHTML 
     }
     return element;
 }
+
+//* Crear elemento Button
+export function createButton(text, className = null, ariaLabel = null, onClick = null, isDisabled = false) {
+    const $btn = createElement("button", className, text);
+    $btn.type = "button";
+
+    ariaLabel && $btn.setAttribute("aria-label", ariaLabel);
+    onClick && $btn.addEventListener("click", onClick);
+    
+    if (isDisabled) {
+        $btn.disabled = true;
+        $btn.tabIndex = -1;
+        $btn.setAttribute("aria-hidden", "true");
+    }
+
+    return $btn;
+}
