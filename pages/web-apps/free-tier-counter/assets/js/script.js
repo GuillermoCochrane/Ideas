@@ -5,7 +5,7 @@ import { cargar, guardar, exportar, removeStorageItem } from './core/storage.js'
 import { construirThead, crearCeldasGrupo } from './components/tabla.js';
 import { totalPaginas, clampPagina } from './handlers/pagination.js';
 import { mostrarError, limpiarError } from './handlers/errors.js';
-import { $, createElement } from './utilities/dom.js';
+import { $, createElement, setText, setValue } from './utilities/dom.js';
 
 //* Constantes
 const MAX = 65;
@@ -70,11 +70,11 @@ function importarArchivo(file) {
       filas = candidatas;
       editando = null;
       paginaActual = 0;
-      $inputHora.value = "";
-      $legendHora.textContent = "Hora";
+      setValue($inputHora, "value", "");
+      setText($legendHora, "Hora");
       $campoHora.classList.remove("editando");
-      $btnSubmit.textContent = "Agregar";
-      $btnCancelar.hidden = true;
+      setText($btnSubmit, "Agregar");
+      setValue($btnCancelar, "hidden", true);
       limpiarError($formError);
       
       // Ajuste 2: Pasamos los parámetros a guardar
@@ -98,11 +98,11 @@ function reiniciar() {
   filas = [];
   editando = null;
   paginaActual = 0;
-  $inputHora.value = "";
-  $legendHora.textContent = "Hora";
+  setValue($inputHora, "value", "");
+  setText($legendHora, "Hora");
   $campoHora.classList.remove("editando");
-  $btnSubmit.textContent = "Agregar";
-  $btnCancelar.hidden = true;
+  setText($btnSubmit, "Agregar");
+  setValue($btnCancelar, "hidden", true);
   limpiarError($formError);
   
   removeStorageItem(STORAGE_KEY);
@@ -116,8 +116,8 @@ function render(nuevaIdx = null) {
   const disponibles = MAX - filas.length;
 
   // Contador
-  $contadorEl.textContent = String(disponibles);
-  $meterEl.value = disponibles;
+  setText($contadorEl, String(disponibles));
+  setValue($meterEl, "value", disponibles);
   $meterEl.setAttribute(
     "aria-valuetext",
     `${disponibles} de ${MAX} usos disponibles`,
@@ -126,8 +126,8 @@ function render(nuevaIdx = null) {
   // Estado del formulario
   const sinCupo = disponibles <= 0;
   const bloqueado = sinCupo && editando === null;
-  $campoHora.hidden = bloqueado;
-  $formFinalizada.hidden = !bloqueado;
+  setValue($campoHora, "hidden", bloqueado);
+  setValue($formFinalizada, "hidden", !bloqueado);
 
   // Paginación: clamps
   const total = totalPaginas(filas, TAM_PAGINA);
@@ -137,7 +137,7 @@ function render(nuevaIdx = null) {
   construirThead($tablaThead, mqDesktop.matches);
 
   // Tbody
-  $tbody.textContent = "";
+  setText($tbody, "");
   const esDesktop = mqDesktop.matches;
   const inicio = paginaActual * TAM_PAGINA;
 
@@ -168,15 +168,15 @@ function render(nuevaIdx = null) {
   }
 
   // Empty state
-  $tablaVacia.hidden = filas.length > 0;
+  setValue($tablaVacia, "hidden", filas.length > 0);
 
   // Paginador
   const mostrarPag = total > 1;
-  $paginacion.hidden = !mostrarPag;
+  setValue($paginacion, "hidden", !mostrarPag);
   if (mostrarPag) {
-    $pagInfo.textContent = `${paginaActual + 1} / ${total}`;
-    $btnPagPrev.disabled = editando !== null || paginaActual === 0;
-    $btnPagNext.disabled = editando !== null || paginaActual >= total - 1;
+    setText($pagInfo, `${paginaActual + 1} / ${total}`);
+    setValue($btnPagPrev, "disabled", editando !== null || paginaActual === 0);
+    setValue($btnPagNext, "disabled", editando !== null || paginaActual >= total - 1);
   }
 }
 
@@ -193,11 +193,11 @@ function irAPagina(n) {
 function iniciarEdicion(idx) {
   editando = idx;
   paginaActual = Math.floor(idx / TAM_PAGINA);
-  $inputHora.value = filas[idx].hora;
-  $legendHora.textContent = `Editando fila #${idx + 1}`;
+  setValue($inputHora, "value", filas[idx].hora);
+  setText($legendHora, `Editando fila #${idx + 1}`);
   $campoHora.classList.add("editando");
-  $btnSubmit.textContent = "Guardar";
-  $btnCancelar.hidden = false;
+  setText($btnSubmit, "Guardar");
+  setValue($btnCancelar, "hidden", false);
   limpiarError($formError);
   render();
   $inputHora.focus();
@@ -205,11 +205,11 @@ function iniciarEdicion(idx) {
 
 function cancelarEdicion() {
   editando = null;
-  $inputHora.value = "";
-  $legendHora.textContent = "Hora";
+  setValue($inputHora, "value", "");
+  setText($legendHora, "Hora");
   $campoHora.classList.remove("editando");
-  $btnSubmit.textContent = "Agregar";
-  $btnCancelar.hidden = true;
+  setText($btnSubmit, "Agregar");
+  setValue($btnCancelar, "hidden", true);
   limpiarError($formError);
   render();
   $inputHora.focus();
@@ -219,11 +219,11 @@ function cancelarEdicion() {
 function eliminarFila(idx) {
   if (editando === idx) {
     editando = null;
-    $inputHora.value = "";
-    $legendHora.textContent = "Hora";
+    setValue($inputHora, "value", "");
+    setText($legendHora, "Hora");
     $campoHora.classList.remove("editando");
-    $btnSubmit.textContent = "Agregar";
-    $btnCancelar.hidden = true;
+    setText($btnSubmit, "Agregar");
+    setValue($btnCancelar, "hidden", true);
   } else if (editando !== null && editando > idx) {
     editando -= 1;
   }
@@ -248,11 +248,11 @@ function enviarFormulario(e) {
     filas[editando].hora = valor;
     const idxEditado = editando;
     editando = null;
-    $inputHora.value = "";
-    $legendHora.textContent = "Hora";
+    setValue($inputHora, "value", "");
+    setText($legendHora, "Hora");
     $campoHora.classList.remove("editando");
-    $btnSubmit.textContent = "Agregar";
-    $btnCancelar.hidden = true;
+    setText($btnSubmit, "Agregar");
+    setValue($btnCancelar, "hidden", true);
     guardar(STORAGE_KEY, filas);
     render(idxEditado);
     $inputHora.focus();
@@ -267,7 +267,7 @@ function enviarFormulario(e) {
   const idxNuevo = filas.length - 1;
   paginaActual = Math.floor(idxNuevo / TAM_PAGINA);
   guardar(STORAGE_KEY, filas);
-  $inputHora.value = "";
+  setValue($inputHora, "value", "");
   render(idxNuevo);
   $inputHora.focus();
 }
