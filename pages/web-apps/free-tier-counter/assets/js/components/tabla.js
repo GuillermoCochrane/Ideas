@@ -1,5 +1,6 @@
-// ? Constructores de la tabla
-import { createRow, createCell, createButton, createHeader } from '../utilities/dom.js';
+// ? Constructores de la tabla y sus filas
+import { createRow, createHeader } from '../utilities/dom.js';
+import { crearCeldaIdx, crearCeldaHora, crearCeldaAcciones, crearCeldasPlaceholder } from './celdas.js';
 
 export function construirThead($tablaThead, esDesktop) {
   $tablaThead.textContent = "";
@@ -13,37 +14,6 @@ export function construirThead($tablaThead, esDesktop) {
     }
   }
   $tablaThead.appendChild($tr);
-}
-
-export function crearCeldaIdx(n) {
-  return createCell(null, String(n));
-}
-
-export function crearCeldaHora(txt) {
-  return createCell(null, txt);
-}
-
-export function crearCeldaAcciones(idxGlobal, onEdit, onDelete) {
-  const $td = createCell();
-
-  const $btnEditar = createButton("✎", null, `Editar fila ${idxGlobal + 1}`, () => onEdit(idxGlobal));
-  const $btnEliminar = createButton("×", "peligro", `Eliminar fila ${idxGlobal + 1}`, () => onDelete(idxGlobal));
-
-  $td.append($btnEditar, $btnEliminar);
-  return $td;
-}
-
-export function crearCeldasPlaceholder() {
-  const $tdIdx = createCell("placeholder", "#");
-  const $tdHora = createCell("placeholder", "--:--");
-  const $tdAcc = createCell("placeholder");
-
-  const $b1 = createButton("✎", null, null, null, true);
-  const $b2 = createButton("×", null, null, null, true);
-
-  $tdAcc.append($b1, $b2);
-
-  return [$tdIdx, $tdHora, $tdAcc];
 }
 
 export function crearCeldasGrupo(idxGlobal, filas, onEdit, onDelete) {
