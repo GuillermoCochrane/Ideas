@@ -6,6 +6,7 @@ import { construirThead, crearCeldasGrupo } from './components/tabla.js';
 import { totalPaginas, clampPagina } from './handlers/pagination.js';
 import { mostrarError, limpiarError } from './handlers/errors.js';
 import { $, createElement, setText, setValue } from './utilities/dom.js';
+import { initFormEvents, initDataEvents, initPaginationEvents, initLayoutEvents } from './handlers/events.js';
 
 //* Constantes
 const MAX = 65;
@@ -22,7 +23,6 @@ let paginaActual = 0;
 //* Variables del DOM 
 const $contadorEl = $("#contador");
 const $meterEl = $("#meter");
-const $form = $("#form");
 const $inputHora = $("#hora");
 const $btnSubmit = $("#btn-submit");
 const $btnCancelar = $("#btn-cancelar");
@@ -37,11 +37,6 @@ const $paginacion = $("#paginacion");
 const $btnPagPrev = $("#btn-pag-prev");
 const $btnPagNext = $("#btn-pag-next");
 const $pagInfo = $("#pag-info");
-const $btnExportar = $("#btn-exportar");
-const $btnImportar = $("#btn-importar");
-const $btnReiniciar = $("#btn-reiniciar");
-const $archivoInput = $("#archivo");
-
 
 //* ---------- Export / Import ----------
 function importarArchivo(file) {
@@ -272,41 +267,12 @@ function enviarFormulario(e) {
   $inputHora.focus();
 }
 
-//* ---------- Inicialización de Eventos ----------
-function initFormEvents() {
-  $form.addEventListener("submit", enviarFormulario);
-  $btnCancelar.addEventListener("click", cancelarEdicion);
-  document.addEventListener("keydown", (e) => {
-    if (e.key === "Escape" && editando !== null) cancelarEdicion();
-  });
-}
-
-function initDataEvents() {
-  $btnExportar.addEventListener("click", () => exportar(filas));
-  $btnImportar.addEventListener("click", () => $archivoInput.click());
-  $archivoInput.addEventListener("change", () => {
-    const file = $archivoInput.files && $archivoInput.files[0];
-    if (file) importarArchivo(file);
-    $archivoInput.value = "";
-  });
-  $btnReiniciar.addEventListener("click", reiniciar);
-}
-
-function initPaginationEvents() {
-  $btnPagPrev.addEventListener("click", () => irAPagina(paginaActual - 1));
-  $btnPagNext.addEventListener("click", () => irAPagina(paginaActual + 1));
-}
-
-function initLayoutEvents() {
-  mqDesktop.addEventListener("change", () => render());
-}
-
 //* ---------- Inicio ----------
 filas = cargar(STORAGE_KEY, HORA_RE);
 
-initFormEvents();
-initDataEvents();
-initPaginationEvents();
-initLayoutEvents();
+initFormEvents( enviarFormulario, cancelarEdicion,() => editando !== null);
+initDataEvents( () => exportar(filas), importarArchivo, reiniciar );
+initPaginationEvents( irAPagina, () => paginaActual);
+initLayoutEvents(() => render());
 
 render();
